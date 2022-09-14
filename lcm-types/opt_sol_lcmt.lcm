@@ -1,0 +1,5 @@
+struct opt_sol_lcmt {
+    int32_t N;
+    int32_t contacts[N][4];
+    float qdummy[N][12];   
+}

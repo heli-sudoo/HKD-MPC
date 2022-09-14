@@ -1,0 +1,15 @@
+struct hkd_problem_data_lcm_t {
+    int32_t n_timesteps;
+    float contacts[4][n_timesteps];
+    float times[n_timesteps];
+    float pos_r[3][n_timesteps];
+    float eul_r[3][n_timesteps];
+    float vel_r[3][n_timesteps];
+    float omega_r[3][n_timesteps];
+    float qdummy_r[12][n_timesteps];    
+    float pos[3][n_timesteps];
+    float eul[3][n_timesteps];
+    float vel[3][n_timesteps];
+    float omega[3][n_timesteps];
+    float qdummy[12][n_timesteps];    
+}

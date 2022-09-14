@@ -1,0 +1,1 @@
+lcmtypes/hkd_command_lcmt.class lcmtypes/hkd_data_lcmt.class lcmtypes/hkd_problem_data_lcm_t.class lcmtypes/opt_sol_lcmt.class

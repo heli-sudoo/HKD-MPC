@@ -1,0 +1,11 @@
+struct hkd_command_lcmt {
+    int32_t N_mpcsteps;
+    double mpc_times[10];
+    float hkd_controls[10][24];
+    float des_body_state[10][12];
+    int32_t contacts[10][4];
+    double statusTimes[10][4];
+    float foot_placement[12];       
+    float feedback[10][12][12];
+    float solve_time;
+}

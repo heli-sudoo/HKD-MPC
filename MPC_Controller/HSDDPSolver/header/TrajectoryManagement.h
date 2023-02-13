@@ -16,62 +16,6 @@ using std::deque;
 
 using namespace std;
 
-template <class Model_>
-struct BriefTrajectoryIterator
-{
-    typedef typename Model_::Scalar T;
-    static const int xs = Model_::state_dim;
-    static const int us = Model_::contrl_dim;
-    static const int ys = Model_::output_dim;
-
-    typename deque<VecM<T, xs>>::iterator Xiter;
-    typename deque<VecM<T, us>>::iterator Uiter;
-    typename deque<VecM<T, ys>>::iterator Yiter;
-};
-
-template <class Model_>
-struct BriefTrajectory
-{
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-    typedef typename Model_::Scalar T;
-    static const int xs = Model_::state_dim;
-    static const int us = Model_::contrl_dim;
-    static const int ys = Model_::output_dim;
-
-    deque<VecM<T, xs>> X;
-    deque<VecM<T, us>> U;
-    deque<VecM<T, ys>> Y;
-    size_t len;
-    size_t length()
-    {
-        // check_length();
-        len = X.size();
-        return len;
-    }
-    void check_length()
-    {
-        if (X.size() != U.size())
-        {
-            printf("Trajectory length of state and control do not match \n");
-        }
-        if (X.size() != Y.size())
-        {
-            printf("Trajectory length of state and output do not match \n");
-        }
-    }
-    void clear()
-    {
-        X.clear();
-        U.clear();
-        Y.clear();
-    }
-    void get_iterator(BriefTrajectoryIterator<Model_> &traj_iter, size_t offset = 0)
-    {
-        traj_iter.Xiter = X.begin() + offset;
-        traj_iter.Uiter = U.begin() + offset;
-        traj_iter.Yiter = Y.begin() + offset;
-    }
-};
 
 template <typename T, size_t xs, size_t us, size_t ys>
 class Trajectory

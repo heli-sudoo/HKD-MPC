@@ -1,7 +1,6 @@
 #ifndef HKDPROBLEM_H
 #define HKDPROBLEM_H
 
-#include "HKDContactSchedule.h"
 #include "TrajectoryManagement.h"
 #include "SinglePhase.h"
 #include "ConstraintsBase.h"

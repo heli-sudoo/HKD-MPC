@@ -11,7 +11,6 @@
 #include "HSDDP_CPPTypes.h"
 #include "HSDDP_CompoundTypes.h"
 #include "HKDModel.h"
-#include "HKDContactSchedule.h"
 #include "HKDProblem.h"
 #include "HKDReset.h"
 #include "MultiPhaseDDP.h"

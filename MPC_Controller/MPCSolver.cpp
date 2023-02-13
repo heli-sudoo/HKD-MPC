@@ -57,7 +57,7 @@ void MPCSolver<T>::initialize()
     // set the initial condition
     xinit.setZero(24);
     body << 0, 0, 0, 0, 0, 0.2486, 0, 0, 0, 0, 0, 0;
-    qJ << 0, 0.9, -1.8, 0, 0.9, -1.8, 0, 0.9, -1.8, 0, 0.9, -1.8;
+    qJ << 0, -0.8, 1.6, 0, -0.8, 1.6, 0, -0.8, 1.6, 0, -0.8, 1.6;
     pos = body.segment(3, 3);
     eul = body.head(3);
 

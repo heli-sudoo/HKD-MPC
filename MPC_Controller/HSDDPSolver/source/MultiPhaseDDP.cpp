@@ -47,6 +47,7 @@ void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_part
         max_pconstr = std::min(max_pconstr, phases[i]->get_max_pconstrs()); // should have non-positive value
         max_tconstr = std::max(max_tconstr, phases[i]->get_max_tconstrs()); // should have non-negative value
     }
+
     // DVec<T> xend = phases.back()->get_terminal_state();
     // std::cout << "xend = " << xend.transpose() << std::endl;
 }
@@ -387,4 +388,16 @@ void MultiPhaseDDP<T>::update_nominal_trajectory()
     }
 }
 
+template <typename T>
+T MultiPhaseDDP<T>::check_dynamics_feasibility()
+{
+    T feas = 0;
+
+    for (auto & phase : phases)
+    {
+        feas += phase->check_dynamics_feasibility();
+    }
+    
+    return feas;
+}
 template class MultiPhaseDDP<double>;

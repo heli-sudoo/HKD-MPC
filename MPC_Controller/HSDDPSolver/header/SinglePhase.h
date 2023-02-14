@@ -137,6 +137,8 @@ public:
 
     void reset_params() override {constraintContainer.reset_params();}
 
+    T check_dynamics_feasibility() override {return traj->dynamics_feasibility();}
+
 private:
     void update_trajectory_ptrs();
     

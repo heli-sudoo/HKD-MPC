@@ -64,6 +64,8 @@ public:
 
     virtual void reset_params() {}
 
+    virtual T check_dynamics_feasibility() {return 0;}
+
 };
 
 #endif //SINGLEPHASE_BASE_H

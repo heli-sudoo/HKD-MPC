@@ -74,7 +74,8 @@ public:
         max_tconstr_prev = 0;
         max_pconstr_prev = 0;
     }
-        
+
+    T check_dynamics_feasibility();    
 
 public:
     int n_phases;

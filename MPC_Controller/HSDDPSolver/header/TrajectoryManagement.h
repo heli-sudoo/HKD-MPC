@@ -39,6 +39,8 @@ public:
     void push_back_zero();
     int size(){return Xbar.size();}
 
+    T dynamics_feasibility(int norm_id = 2);
+
 public:
     T duration;
     T timeStep;
@@ -50,6 +52,10 @@ public:
     deque<VecM<T, us>> Ubar;
     deque<VecM<T, us>> U;
     deque<VecM<T, ys>> Y;
+
+    /* Shared pointers to hold simulated state, defects */
+    deque<VecM<T, xs>> Xsim;
+    deque<VecM<T, xs>> Defect;
 
     /* Shared pointers to hold linearized dynamics */
     deque<MatMN<T, xs, xs>> A;

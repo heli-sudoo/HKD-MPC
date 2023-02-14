@@ -28,6 +28,14 @@ public:
 
     virtual void forward_sweep(T eps, HSDDP_OPTION&, bool) = 0; // compute both dynamics propagation and dynamics partials
 
+    virtual void linear_rollout(T eps, HSDDP_OPTION&) = 0;
+
+    virtual void hybrid_rollout(T eps, HSDDP_OPTION&) = 0;
+
+    virtual void nonlinear_rollout(T eps, HSDDP_OPTION&) = 0;
+
+    virtual void LQ_approximation() = 0;
+
     virtual bool backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime) = 0;
     
     virtual DVec<T> resetmap(DVec<T>&) = 0;

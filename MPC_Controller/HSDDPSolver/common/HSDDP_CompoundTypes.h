@@ -21,6 +21,7 @@ struct HSDDP_OPTION
     bool AL_active = 1;               // activate terminal constraint
     bool ReB_active = 1;              // activate path constraint
     bool smooth_active = 0;           // activate control smoothness penalization
+    std::vector<int> SS_set;          // shooting state set
 };
 
 

@@ -99,6 +99,14 @@ public:
 
     void forward_sweep(T eps, HSDDP_OPTION& option, bool) override;
 
+    void linear_rollout(T eps, HSDDP_OPTION&) override;
+
+    void hybrid_rollout(T eps, HSDDP_OPTION&) override;
+
+    void nonlinear_rollout(T eps, HSDDP_OPTION&) override;
+
+    void LQ_approximation() override;
+
     bool backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime) override;
 
     DVec<T> resetmap(DVec<T>& x_) override;
@@ -169,6 +177,10 @@ private:
     deque<VecM<T, us>>* U = nullptr;
     deque<VecM<T, ys>>* Y = nullptr;
 
+    /* pointers to hold simulation state, defect etc */
+    deque<VecM<T, xs>> *Xsim = nullptr;
+    deque<VecM<T, xs>> *Defect = nullptr;
+
     /* pointers to hold linearized dynamics */
     deque<MatMN<T, xs, xs>>* A = nullptr;
     deque<MatMN<T, xs, us>>* B = nullptr;
@@ -182,6 +194,9 @@ private:
     deque<VecM<T, xs>>* G = nullptr;
     deque<MatMN<T, xs, xs>>* H = nullptr;
     deque<MatMN<T, xs, xs>>* K = nullptr;
+    
+    deque<VecM<T, xs>>* dX = nullptr;
+    
 
     // running cost and terminal cost
     deque<RCostData<T, xs, us, ys>>* rcostData = nullptr;

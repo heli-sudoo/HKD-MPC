@@ -70,6 +70,7 @@ public:
     deque<VecM<T, xs>> G;
     deque<MatMN<T, xs, xs>> H;
     deque<MatMN<T, xs, xs>> K;
+    deque<VecM<T, xs>> dX;
 
     deque<RCostData<T, xs, us, ys>> rcostData;
     TCostData<T, xs> tcostData;

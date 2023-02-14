@@ -28,6 +28,7 @@ void Trajectory<T, xs, us, ys>::create_data(T timeStep_, int horizon_)
     G.assign(horizon + 1, VecM<T, xs>::Zero());
     H.assign(horizon + 1, MatMN<T, xs, xs>::Zero());
     K.assign(horizon + 1, MatMN<T, xs, xs>::Zero());
+    dX.assign(horizon + 1, VecM<T, xs>::Zero());
 
     rcostData.assign(horizon, RCostData<T, xs, us, ys>());
 }
@@ -56,6 +57,7 @@ void Trajectory<T, xs, us, ys>::clear()
     H.clear();
     K.clear();
     rcostData.clear();
+    dX.clear();
 
     horizon = 0;
     timeStep = 0;
@@ -85,6 +87,7 @@ void Trajectory<T, xs, us, ys>::zero_all()
     set_eigen_deque_zero(G);
     set_eigen_deque_zero(H);
     set_eigen_deque_zero(K);
+    set_eigen_deque_zero(dX);
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -96,6 +99,8 @@ void Trajectory<T, xs, us, ys>::zero_val_approx()
     set_eigen_deque_zero(G);
     set_eigen_deque_zero(H);
     set_eigen_deque_zero(K);
+
+    set_eigen_deque_zero(dX);
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -129,6 +134,7 @@ void Trajectory<T, xs, us, ys>::pop_front()
     G.pop_front();
     H.pop_front();
     K.pop_front();
+    dX.pop_front();
 
     rcostData.pop_front();
     horizon--;
@@ -158,6 +164,7 @@ void Trajectory<T, xs, us, ys>::push_back_zero()
     G.push_back(VecM<T, xs>::Zero());
     H.push_back(MatMN<T, xs, xs>::Zero());
     K.push_back(MatMN<T, xs, xs>::Zero());
+    dX.push_back(VecM<T, xs>::Zero());
 
     rcostData.push_back(RCostData<T, xs, us, ys>());
     horizon++;

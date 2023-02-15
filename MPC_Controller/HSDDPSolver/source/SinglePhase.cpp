@@ -26,12 +26,29 @@ void SinglePhase<T, xs, us, ys>::initialization()
     Bar.setZero(pConstrs_size);
     Bard.setZero(pConstrs_size);
     Bardd.setZero(pConstrs_size);
+
+    x_init.setZero();
+    xsim_init.setZero();
+    dx_init.setZero();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::set_initial_condition(DVec<T> &x0_)
 {
     X->at(0) = x0_;
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::set_initial_condition(DVec<T> &x0_, DVec<T> &x_sim_0_)
+{
+    x_init = x0_;
+    xsim_init = x_sim_0_;
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::set_initial_condition_dx(DVec<T> &dx0_)
+{
+    dx_init = dx0_;
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -43,9 +60,9 @@ template <typename T, size_t xs, size_t us, size_t ys>
 DVec<T> SinglePhase<T, xs, us, ys>::resetmap(DVec<T> &x_)
 {
     DVec<T> xnext;
-    if (resetmap_callback != nullptr)
+    if (resetmap_func_handle != nullptr)
     {
-        resetmap_callback(xnext, x_);
+        resetmap_func_handle(xnext, x_);
     }
     return xnext;
 }
@@ -53,9 +70,9 @@ DVec<T> SinglePhase<T, xs, us, ys>::resetmap(DVec<T> &x_)
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::resetmap_partial(DMat<T> &Px_, DVec<T> &x_)
 {
-    if (resetmap_partial_callback != nullptr)
+    if (resetmap_partial_func_handle != nullptr)
     {
-        resetmap_partial_callback(Px_, x_);
+        resetmap_partial_func_handle(Px_, x_);
     }
 }
 
@@ -82,7 +99,7 @@ DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state_nominal()
 template <typename T, size_t xs, size_t us, size_t ys>
 T SinglePhase<T, xs, us, ys>::get_actual_cost()
 {
-    return V->at(phase_horizon);
+    return actual_cost;
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -109,6 +126,7 @@ void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, bool
 {
     V->at(0) = 0;
     T Vprev = 0;
+    actual_cost = 0;
     VecM<T, xs> delta_x;
     VecM<T, us> delta_u;
     VecM<T, ys> delta_y;
@@ -145,8 +163,9 @@ void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, bool
             constraintContainer.get_reb_params(reb_params, k);
             update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, calc_partial);
         }
-        V->at(k) = Vprev + rcostData->at(k).l;
-        Vprev = V->at(k);
+        // V->at(k) = Vprev + rcostData->at(k).l;
+        // Vprev = V->at(k);
+        actual_cost += rcostData->at(k).l;
     }
     /* compute terminal cost and its partials */
     costContainer.terminal_cost(*tcostData, X->at(k), k);
@@ -164,7 +183,8 @@ void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, bool
         constraintContainer.get_al_params(al_params);
         update_terminal_cost_with_tconstr(tconstrsData, al_params, calc_partial);
     }
-    V->at(phase_horizon) = Vprev + tcostData->Phi;
+    // V->at(phase_horizon) = Vprev + tcostData->Phi;
+    actual_cost += tcostData->Phi;
 }
 
 /*
@@ -179,9 +199,8 @@ void SinglePhase<T, xs, us, ys>::linear_rollout(T eps, HSDDP_OPTION &option)
 
     T exp_cost_change_1(0);
     T exp_cost_change_2(0);
-
-    // To DO: Reset dX->at(0) when crossing phases
-
+    
+    dX->at(0) = dx_init;
     for (int k = 0; k < phase_horizon; k++)
     {
         auto &qk = rcostData->at(k).lx;
@@ -211,13 +230,9 @@ void SinglePhase<T, xs, us, ys>::linear_rollout(T eps, HSDDP_OPTION &option)
     exp_cost_change_2 += 0.5 * dxk.transpose() * tcostData->Phixx * dxk;
 }
 
+/* Equivalent to system roll-out when eps = 0 */
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option)
-{
-}
-
-template <typename T, size_t xs, size_t us, size_t ys>
-void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
 {
     VecM<T, xs> dxk;
     VecM<T, xs> xk_next;
@@ -227,10 +242,12 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
     vector<TConstrData<T, xs>> tconstrsData;
     vector<REB_Param_Struct<T>> reb_params;
     vector<AL_Param_Struct<T>> al_params;
-    V->at(0) = 0;
-    T Vprev = 0;
 
-    // To Do: Reset X->at(0) and Xsim->at(0) when accrosing phases
+    // V->at(0) = 0;
+    // T Vprev = 0;
+    actual_cost = 0;
+    X->at(0) = x_init;
+    Xsim->at(0) = xsim_init;
 
     int k = 0;
     for (int k = 0; k < phase_horizon; k++)
@@ -241,15 +258,18 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
 
         costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
 
-        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
+        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));                
 
         auto it = std::find(SS_set.begin(), SS_set.end(), k + 1);
-        // If not a shooting state, overide X->at(k+1) with dynamics simulation
-        if (it == SS_set.end())
+        if (it == SS_set.end()) // if k is a roll-out state        
         {
             X->at(k + 1) = Xsim->at(k + 1);
         }
-
+        else // if k is a shooting state
+        {
+            X->at(k + 1) = Xbar->at(k+1) + eps * dX->at(k+1);
+        }
+        
         /* compute running cost*/
         costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
 
@@ -264,8 +284,9 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
             update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, 0);
         }
 
-        V->at(k) = Vprev + rcostData->at(k).l;
-        Vprev = V->at(k);
+        // V->at(k) = Vprev + rcostData->at(k).l;
+        // Vprev = V->at(k);
+        actual_cost += rcostData->at(k).l;
     }
 
      /* compute terminal cost and its partials */
@@ -281,12 +302,109 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
         constraintContainer.get_al_params(al_params);
         update_terminal_cost_with_tconstr(tconstrsData, al_params, 0);
     }
-    V->at(phase_horizon) = Vprev + tcostData->Phi;
+    // V->at(phase_horizon) = Vprev + tcostData->Phi;
+    actual_cost = tcostData->Phi;    
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-void SinglePhase<T, xs, us, ys>::LQ_approximation()
+void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
 {
+    VecM<T, xs> dxk;
+    VecM<T, xs> xk_next;
+    const auto &SS_set = option.SS_set; // set of the shooting state time index (relative to the current phase)
+
+    vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
+    vector<TConstrData<T, xs>> tconstrsData;
+    vector<REB_Param_Struct<T>> reb_params;
+    vector<AL_Param_Struct<T>> al_params;
+
+    // V->at(0) = 0;
+    // T Vprev = 0;
+
+    actual_cost = 0;
+    X->at(0) = x_init;
+    Xsim->at(0) = xsim_init;
+
+    int k = 0;
+    for (int k = 0; k < phase_horizon; k++)
+    {
+        dxk = X->at(k) - Xbar->at(k);
+
+        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * dxk;
+
+        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
+
+        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));        
+        
+        X->at(k + 1) = Xsim->at(k + 1) - (1 - eps) * Defect->at(k+1);
+
+        /* compute running cost*/
+        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
+
+        /* compute path constraints */
+        constraintContainer.compute_path_constraints(X->at(k), U->at(k), Y->at(k), k);
+
+        /* update running cost with path constraints using ReB method */
+        if (option.ReB_active)
+        {
+            constraintContainer.get_path_constraints(pconstrsData, k);
+            constraintContainer.get_reb_params(reb_params, k);
+            update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, 0);
+        }
+
+        // V->at(k) = Vprev + rcostData->at(k).l;
+        // Vprev = V->at(k);
+        actual_cost += rcostData->at(k).l;
+    }
+
+     /* compute terminal cost and its partials */
+    costContainer.terminal_cost(*tcostData, X->at(k), k);
+    
+    /* compute terminal constraint */
+    constraintContainer.compute_terminal_constraints(X->at(k));
+
+    /* update terminal cost with terminal constraint using AL */
+    if (option.AL_active)
+    {
+        constraintContainer.get_terminal_constraints(tconstrsData);
+        constraintContainer.get_al_params(al_params);
+        update_terminal_cost_with_tconstr(tconstrsData, al_params, 0);
+    }
+    // V->at(phase_horizon) = Vprev + tcostData->Phi;
+    actual_cost += tcostData->Phi;
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::LQ_approximation(HSDDP_OPTION& option)
+{
+    vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
+    vector<TConstrData<T, xs>> tconstrsData;
+    vector<REB_Param_Struct<T>> reb_params;
+    vector<AL_Param_Struct<T>> al_params;
+
+    /* LQ approximation for all intermediate states */
+    for (int k = 0; k < phase_horizon; k++)
+    {
+        dynamics_partial(A->at(k), B->at(k), C->at(k), D->at(k), X->at(k), U->at(k));
+
+        costContainer.running_cost_par(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
+
+        /* update running cost with path constraints using ReB method */
+        if (option.ReB_active)
+        {
+            constraintContainer.get_path_constraints(pconstrsData, k);
+            constraintContainer.get_reb_params(reb_params, k);
+            update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, 1);
+        }
+    }
+    
+    /* update terminal cost with terminal constraint using AL */
+    if (option.AL_active)
+    {
+        constraintContainer.get_terminal_constraints(tconstrsData);
+        constraintContainer.get_al_params(al_params);
+        update_terminal_cost_with_tconstr(tconstrsData, al_params, 1);
+    }
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>

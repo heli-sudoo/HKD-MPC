@@ -32,7 +32,7 @@ public:
         max_tconstr_prev = 0;
     }
 
-    void set_initial_condition(DVec<T> x0_in) { x0 = x0_in; }
+    void set_initial_condition(DVec<T> x0_in) { x0 = x0_in; dx0.setZero(x0.size()); }
 
     void solve(HSDDP_OPTION option);
 
@@ -40,6 +40,14 @@ public:
 
 public:
     void forward_sweep(T eps, HSDDP_OPTION& option, bool);
+
+    void linear_rollout(T eps, HSDDP_OPTION& option);
+
+    void hybrid_rollout(T eps, HSDDP_OPTION& option);
+
+    void line_search(HSDDP_OPTION& option);
+
+    void LQ_approximation(HSDDP_OPTION& option);
 
     bool backward_sweep(T regularization);
 
@@ -89,6 +97,7 @@ public:
     T max_pconstr; // maximum path constraint violation of all time
 
     DVec<T> x0;
+    DVec<T> dx0;
 private:
     function<void(DVec<T>)> dynamics_init_callback;
 

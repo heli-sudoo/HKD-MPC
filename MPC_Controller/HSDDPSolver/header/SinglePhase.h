@@ -40,9 +40,9 @@ public:
     // function wrapper of Callable dynamics linearizaiton
     function<void(StateMap&, ContrlMap&, OutputMap&, DirectMap&, State&, Contrl&)> dynamics_partial;
     // function wrapper of Callable resetmap
-    function<void(DVec<T>&, DVec<T>&)> resetmap_callback;
+    function<void(DVec<T>&, DVec<T>&)> resetmap_func_handle;
     // function wrapper of Callable resetmap partial
-    function<void(DMat<T>&, DVec<T>&)> resetmap_partial_callback;
+    function<void(DMat<T>&, DVec<T>&)> resetmap_partial_func_handle;
 
     // constraint Contaniner
     ConstraintContainer<T, xs, us, ys> constraintContainer;
@@ -66,12 +66,12 @@ public:
         dynamics_partial = dynamics_partial_in;
     }
 
-    void set_resetmap(function<void(DVec<T>&, DVec<T>&)> resetmap_callback_in){
-        resetmap_callback = resetmap_callback_in;
+    void set_resetmap(function<void(DVec<T>&, DVec<T>&)> resetmap_func_handle_in){
+        resetmap_func_handle = resetmap_func_handle_in;
     }
 
     void set_resetmap_partial(function<void(DMat<T>&, DVec<T>&)> resetmap_partial_in){
-        resetmap_partial_callback = resetmap_partial_in;
+        resetmap_partial_func_handle = resetmap_partial_in;
     }
 
     void add_cost(shared_ptr<CostBase<T,xs,us,ys>> ptr_to_cost_to_add){
@@ -93,6 +93,10 @@ public:
 
     void set_initial_condition(DVec<T>& x0_) override;
 
+    void set_initial_condition(DVec<T>& x0_, DVec<T>& x_sim_0_) override; // set initial condition for both local states and simulation states
+
+    void set_initial_condition_dx(DVec<T>& dx0_) override; // set initial condition for linear rollout
+
     void set_nominal_initial_condition(DVec<T>& x0_) override;
 
     void warmstart() override {}
@@ -105,7 +109,7 @@ public:
 
     void nonlinear_rollout(T eps, HSDDP_OPTION&) override;
 
-    void LQ_approximation() override;
+    void LQ_approximation(HSDDP_OPTION&) override;
 
     bool backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime) override;
 
@@ -202,6 +206,9 @@ private:
     deque<RCostData<T, xs, us, ys>>* rcostData = nullptr;
     TCostData<T, xs>* tcostData  = nullptr;  
 
+    // constraints data
+
+
     // iterators to state, control, output trajectories
     typename deque<VecM<T, xs>>::iterator Xr;
     typename deque<VecM<T, us>>::iterator Ur;
@@ -224,6 +231,13 @@ private:
     DVec<T> Bar;
     DVec<T> Bard;
     DVec<T> Bardd;
+
+    // Initial condition
+    VecM<T, xs> x_init;
+    VecM<T, xs> xsim_init;
+    VecM<T, xs> dx_init;
+
+    T actual_cost;
 };
 
 #endif // SINGLEPHASE_HSDDP

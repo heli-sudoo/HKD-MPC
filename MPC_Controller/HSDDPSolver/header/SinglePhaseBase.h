@@ -24,6 +24,10 @@ public:
 
     virtual void set_initial_condition(DVec<T>& x0_) = 0; // initial condition of the acutual trajectory
 
+    virtual void set_initial_condition(DVec<T>& x0_, DVec<T>& xsim_0_);
+
+    virtual void set_initial_condition_dx(DVec<T>& dx0_) = 0; // initial condition for linear roll-out
+
     virtual void set_nominal_initial_condition(DVec<T>& x0_){} // initial condition of the nominal trajectory
 
     virtual void forward_sweep(T eps, HSDDP_OPTION&, bool) = 0; // compute both dynamics propagation and dynamics partials
@@ -34,7 +38,7 @@ public:
 
     virtual void nonlinear_rollout(T eps, HSDDP_OPTION&) = 0;
 
-    virtual void LQ_approximation() = 0;
+    virtual void LQ_approximation(HSDDP_OPTION&) = 0;
 
     virtual bool backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime) = 0;
     

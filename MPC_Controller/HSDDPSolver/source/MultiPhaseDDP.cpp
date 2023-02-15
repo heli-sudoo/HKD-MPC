@@ -25,14 +25,14 @@ void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_part
     max_tconstr = 0;
     DVec<T> xinit = x0; // initial condition for each phase
 
-    run_before_forward_sweep();
-    for (size_t i = 0; i < n_phases; i++)
+    run_before_forward_sweep(); // currently not used
+    if (n_phases>=1)
     {
-        if (i == 0)
-        {
-            phases[i]->set_nominal_initial_condition(x0);
-        }
-
+        phases[0]->set_nominal_initial_condition(x0);
+    }
+    
+    for (int i = 0; i < n_phases; i++)
+    {       
         if (i > 0)
         {
             // If not the first phase, run resetmap at the end of previous phase
@@ -50,16 +50,70 @@ void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_part
     
 }
 
+/*  
+    @brief: perform linear rollout to compute search direction for shooting state
+            use before running hybrid rollout
+*/
 template <typename T>
 void MultiPhaseDDP<T>::linear_rollout(T eps, HSDDP_OPTION &option)
 {
+    DVec<T> dx_init;
+    DVec<T> dx_end;
+    DMat<T> Px;         // resetmap partial
+    dx_init = dx0;
+
+    for (int i = 0; i < n_phases; i++)
+    {
+        if(i > 0)
+        {
+            dx_end = phases[i-1]->get_terminal_state_dx();
+            phases[i - 1]->resetmap_partial(Px, dx_end);
+            dx_init = Px * dx_end;
+        }
+        
+        phases[i]->set_initial_condition_dx(dx_init);
+
+        phases[i]->linear_rollout(eps, option);
+    }
     
 }
 
+/*
+    @brief: perform hybrid rollout
+            nominal system rollout is obtained with eps = 0
+*/
 template <typename T>
 void MultiPhaseDDP<T>::hybrid_rollout(T eps, HSDDP_OPTION &option)
 {
+    actual_cost = 0;
+    max_pconstr = 0;
+    max_tconstr = 0;
+    DVec<T> xinit = x0; // initial condition for each phase
+    DVec<T> xend;
 
+    run_before_forward_sweep(); // currently not used
+    if (n_phases>=1)
+    {
+        phases[0]->set_nominal_initial_condition(x0);
+    }
+    
+    for (int i = 0; i < n_phases; i++)
+    {       
+        if (i > 0)
+        {
+            // If not the first phase, run resetmap at the end of previous phase
+            xend = phases[i - 1]->get_terminal_state();
+            xinit = phases[i - 1]->resetmap(xend);
+        }
+
+        phases[i]->set_initial_condition(xinit);             // Set initial condition of current phase
+        phases[i]->hybrid_rollout(eps, option); // run forward sweep for current phase
+        actual_cost += phases[i]->get_actual_cost();         // update total cost
+        // update the maximum constraint violations
+        max_pconstr = std::min(max_pconstr, phases[i]->get_max_pconstrs()); // should have non-positive value
+        max_tconstr = std::max(max_tconstr, phases[i]->get_max_tconstrs()); // should have non-negative value
+    }
+    
 }
 
 template <typename T>

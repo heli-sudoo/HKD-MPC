@@ -91,6 +91,12 @@ DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state()
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
+DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state_dx()
+{
+    return dX->back();
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
 DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state_nominal()
 {
     return Xbar->back();

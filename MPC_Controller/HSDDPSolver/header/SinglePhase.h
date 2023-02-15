@@ -121,6 +121,8 @@ public:
 
     DVec<T> get_terminal_state() override;
 
+    DVec<T> get_terminal_state_dx() override;
+
     DVec<T> get_terminal_state_nominal() override;
 
     T get_actual_cost() override;

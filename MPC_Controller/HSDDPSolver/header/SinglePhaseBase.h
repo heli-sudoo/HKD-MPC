@@ -50,6 +50,8 @@ public:
 
     virtual DVec<T> get_terminal_state() = 0;
 
+    virtual DVec<T> get_terminal_state_dx() = 0;
+
     virtual DVec<T> get_terminal_state_nominal(){}
 
     virtual T get_actual_cost() = 0;   

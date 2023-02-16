@@ -243,38 +243,6 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
 }
 
 template <typename T>
-bool MultiPhaseDDP<T>::forward_iteration(HSDDP_OPTION &option)
-{
-    T exp_cost_change = 0;
-    T eps = 1;
-    T cost_prev = actual_cost;
-    bool success = false;    
-
-#ifdef TIME_BENCHMARK
-    fit_iter = 0;
-#endif
-    while (eps > 1e-5)
-    {
-        forward_sweep(eps, option, false); // perform forward sweep but not computing dynamics linearization        
-#ifdef DEBUG
-        printf("\t eps=%.3e \t actual change in cost=%.3e \t expeced change in cost=%.3e\n",
-               eps, actual_cost - cost_prev, option.gamma * exp_cost_change);
-#endif
-        exp_cost_change = eps*dV_1 + 0.5*eps*eps*dV_2;
-        if (actual_cost <= cost_prev + option.gamma  * exp_cost_change)
-        {
-            success = true;
-            break;
-        }
-        eps *= option.alpha;
-#ifdef TIME_BENCHMARK
-        fit_iter++;
-#endif
-    }
-    return success;
-}
-
-template <typename T>
 void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 {
     int iter = 0;

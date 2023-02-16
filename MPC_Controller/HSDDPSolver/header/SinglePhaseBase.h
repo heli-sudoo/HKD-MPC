@@ -30,7 +30,7 @@ public:
 
     virtual void set_nominal_initial_condition(DVec<T>& x0_){} // initial condition of the nominal trajectory
 
-    virtual void forward_sweep(T eps, HSDDP_OPTION&, bool) = 0; // compute both dynamics propagation and dynamics partials
+    virtual void forward_sweep(T eps, HSDDP_OPTION&, int) = 0; // compute both dynamics propagation and dynamics partials
 
     virtual void linear_rollout(T eps, HSDDP_OPTION&) = 0;
 

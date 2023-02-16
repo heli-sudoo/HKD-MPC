@@ -24,8 +24,7 @@ public:
     void set_multiPhaseProblem(deque<shared_ptr<SinglePhaseBase<T>>> phases_in){
         phases = phases_in;
         n_phases = phases.size();
-        actual_cost = 0;
-        // exp_cost_change = 0;
+        actual_cost = 0;        
         max_pconstr = 0;
         max_pconstr_prev = 0;
         max_tconstr = 0;
@@ -39,7 +38,7 @@ public:
     void set_dynamics_init_callback(function<void(DVec<T>)> dynamics_init_callback_);
 
 public:
-    void forward_sweep(T eps, HSDDP_OPTION& option, bool);
+    void forward_sweep(T eps, HSDDP_OPTION& option, int);
 
     void linear_rollout(T eps, HSDDP_OPTION& option);
 

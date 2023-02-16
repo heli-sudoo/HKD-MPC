@@ -18,7 +18,7 @@ static int fit_iter = 0;
           eps: line search parameter (0, 1)
 */
 template <typename T>
-void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_partial)
+void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, int calc_partial)
 {
     actual_cost = 0;
     max_pconstr = 0;
@@ -27,13 +27,13 @@ void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_part
     DVec<T> xend;
 
     run_before_forward_sweep(); // currently not used
-    if (n_phases>=1)
+    if (n_phases >= 1)
     {
         phases[0]->set_nominal_initial_condition(x0);
     }
-    
+
     for (int i = 0; i < n_phases; i++)
-    {       
+    {
         if (i > 0)
         {
             // If not the first phase, run resetmap at the end of previous phase
@@ -48,10 +48,9 @@ void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_part
         max_pconstr = std::min(max_pconstr, phases[i]->get_max_pconstrs()); // should have non-positive value
         max_tconstr = std::max(max_tconstr, phases[i]->get_max_tconstrs()); // should have non-negative value
     }
-    
 }
 
-/*  
+/*
     @brief: perform linear rollout to compute search direction for shooting state
             use before running hybrid rollout
 */
@@ -60,23 +59,22 @@ void MultiPhaseDDP<T>::linear_rollout(T eps, HSDDP_OPTION &option)
 {
     DVec<T> dx_init;
     DVec<T> dx_end;
-    DMat<T> Px;         // resetmap partial
+    DMat<T> Px; // resetmap partial
     dx_init = dx0;
 
     for (int i = 0; i < n_phases; i++)
     {
-        if(i > 0)
+        if (i > 0)
         {
-            phases[i-1]->get_terminal_state_dx(dx_end);
+            phases[i - 1]->get_terminal_state_dx(dx_end);
             phases[i - 1]->resetmap_partial(Px, dx_end);
             dx_init = Px * dx_end;
         }
-        
+
         phases[i]->set_initial_condition_dx(dx_init);
 
         phases[i]->linear_rollout(eps, option);
     }
-    
 }
 
 /*
@@ -95,13 +93,13 @@ void MultiPhaseDDP<T>::hybrid_rollout(T eps, HSDDP_OPTION &option)
     DVec<T> xsim_end;
 
     run_before_forward_sweep(); // currently not used
-    if (n_phases>=1)
+    if (n_phases >= 1)
     {
         phases[0]->set_nominal_initial_condition(x0);
     }
-    
+
     for (int i = 0; i < n_phases; i++)
-    {       
+    {
         if (i > 0)
         {
             // If not the first phase, run resetmap at the end of previous phase
@@ -110,14 +108,13 @@ void MultiPhaseDDP<T>::hybrid_rollout(T eps, HSDDP_OPTION &option)
             xsim_init = phases[i - 1]->resetmap(xsim_end);
         }
 
-        phases[i]->set_initial_condition(xinit, xsim_init);             // Set initial condition of current phase
-        phases[i]->hybrid_rollout(eps, option);            // run hybrid rollout for each phase
-        actual_cost += phases[i]->get_actual_cost();         // update total cost
+        phases[i]->set_initial_condition(xinit, xsim_init); // Set initial condition of current phase
+        phases[i]->hybrid_rollout(eps, option);             // run hybrid rollout for each phase
+        actual_cost += phases[i]->get_actual_cost();        // update total cost
         // update the maximum constraint violations
         max_pconstr = std::min(max_pconstr, phases[i]->get_max_pconstrs()); // should have non-positive value
         max_tconstr = std::max(max_tconstr, phases[i]->get_max_tconstrs()); // should have non-negative value
     }
-    
 }
 
 template <typename T>
@@ -126,20 +123,20 @@ bool MultiPhaseDDP<T>::line_search(HSDDP_OPTION &option)
     T exp_cost_change = 0;
     T eps = 1;
     T cost_prev = actual_cost;
-    bool success = false;    
+    bool success = false;
 
 #ifdef TIME_BENCHMARK
     fit_iter = 0;
 #endif
     while (eps > 1e-5)
     {
-        hybrid_rollout(eps, option); 
+        hybrid_rollout(eps, option);
 #ifdef DEBUG
         printf("\t eps=%.3e \t actual change in cost=%.3e \t expeced change in cost=%.3e\n",
                eps, actual_cost - cost_prev, option.gamma * exp_cost_change);
 #endif
-        exp_cost_change = eps*dV_1 + 0.5*eps*eps*dV_2;
-        if (actual_cost <= cost_prev + option.gamma  * exp_cost_change)
+        exp_cost_change = eps * dV_1 + 0.5 * eps * eps * dV_2;
+        if (actual_cost <= cost_prev + option.gamma * exp_cost_change)
         {
             success = true;
             break;
@@ -209,7 +206,7 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
     DVec<T> Gprime;
     DMat<T> Hprime;
     DVec<T> xend;
-    DMat<T> Px;    
+    DMat<T> Px;
     size_t xs(0), xs_next(0);
     T dV_1_temp(0), dV_2_temp(0);
     dV_1 = 0;
@@ -229,7 +226,7 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
             phases[i + 1]->get_value_approx(Gprime, Hprime); // get the value infomation at the begining of phase i+1
             impact_aware_step(Gprime, Hprime, Px);
         }
-        
+
         // If backward sweep of current phase fails, break and return false
         success = phases[i]->backward_sweep(regularization, Gprime, Hprime);
         if (!success)
@@ -238,7 +235,7 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
         phases[i]->get_exp_cost_change(dV_1_temp, dV_2_temp);
         dV_1 += dV_1_temp;
         dV_2 += dV_2_temp;
-    } 
+    }
     return success;
 }
 
@@ -282,10 +279,10 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 
 #ifdef TIME_BENCHMARK
         start = high_resolution_clock::now();
-#endif
-        forward_sweep(0, option, true);            
-        
-        printf("total cost = %f \n", actual_cost);   
+#endif        
+        hybrid_rollout(0, option);
+
+        printf("total cost = %f \n", actual_cost);
 
 #ifdef TIME_BENCHMARK
         stop = high_resolution_clock::now();
@@ -308,16 +305,21 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 #ifdef TIME_BENCHMARK
             start = high_resolution_clock::now();
 #endif
+            LQ_approximation(option);
             success = backward_sweep_regularized(regularization, option);
             if (!success)
             {
                 goto bad_solve;
             }
             
-            // if (forward_iteration(option))
+            if (option.SS_set.size()>0)
+            {
+                linear_rollout(1.0, option);
+            }
+                        
             if (line_search(option))
             {
-                // if line search succeeds, accept the step                
+                // if line search succeeds, accept the step
                 update_nominal_trajectory();
             }
             else
@@ -340,8 +342,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 #ifdef TIME_BENCHMARK
             start = high_resolution_clock::now();
 #endif
-
-            forward_sweep(0, option, true);
+            
 
 #ifdef TIME_BENCHMARK
             stop = high_resolution_clock::now();
@@ -372,7 +373,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
         if (fabs(max_tconstr - max_tconstr_prev) < 0.0001 && fabs(max_pconstr - max_pconstr_prev) < 0.0001)
         {
             printf("constraints stop decreasing \n");
-            printf("optimization terminates \n");            
+            printf("optimization terminates \n");
             break;
         }
     }
@@ -380,30 +381,27 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
     {
         printf("maximum iteration reached \n");
     }
-    
+
     printf("total cost = %f \n", actual_cost);
     printf("terminal constraint violation = %f \n", max_tconstr);
     printf("path constraint violation = %f \n", fabs(max_pconstr));
 
-    bad_solve:
+bad_solve:
     if (!success)
     {
         printf(RED);
         printf("Failed to solve the optimization due to too large regularization \n");
         printf(RESET);
     }
-    
-        
 }
 
 template <typename T>
-void MultiPhaseDDP<T>::LQ_approximation(HSDDP_OPTION& option)
+void MultiPhaseDDP<T>::LQ_approximation(HSDDP_OPTION &option)
 {
     for (int i = 0; i < n_phases; i++)
     {
         phases[i]->LQ_approximation(option);
     }
-    
 }
 /*
     @brief: Set a method to initialize the dynamics everytime berfore running forward sweep
@@ -474,11 +472,11 @@ T MultiPhaseDDP<T>::check_dynamics_feasibility()
 {
     T feas = 0;
 
-    for (auto & phase : phases)
+    for (auto &phase : phases)
     {
         feas += phase->check_dynamics_feasibility();
     }
-    
+
     return feas;
 }
 template class MultiPhaseDDP<double>;

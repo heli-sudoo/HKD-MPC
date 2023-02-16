@@ -101,7 +101,7 @@ public:
 
     void warmstart() override {}
 
-    void forward_sweep(T eps, HSDDP_OPTION& option, bool) override;
+    void forward_sweep(T eps, HSDDP_OPTION& option, int) override;
 
     void linear_rollout(T eps, HSDDP_OPTION&) override;
 
@@ -163,13 +163,22 @@ private:
     void update_running_cost_with_pconstr(RCostData<T,xs,us,ys>& rcost,
                                           vector<IneqConstrData<T,xs,us,ys>>& pconstrsData,
                                           vector<REB_Param_Struct<T>>& reb_params,
-                                          bool flag);
-
+                                          int flag);
+    void update_running_cost_with_pconstr(RCostData<T,xs,us,ys>& rcost,
+                                          vector<IneqConstrData<T,xs,us,ys>>& pconstrsData,
+                                          vector<REB_Param_Struct<T>>& reb_params); 
+    void update_running_cost_par_with_pconstr(RCostData<T,xs,us,ys>& rcost,
+                                          vector<IneqConstrData<T,xs,us,ys>>& pconstrsData,
+                                          vector<REB_Param_Struct<T>>& reb_params);                                                                                        
     void update_running_cost_with_smooth();
 
     void update_terminal_cost_with_tconstr(vector<TConstrData<T, xs>>& tconstrsData,
                                            vector<AL_Param_Struct<T>>& al_params,
-                                           bool flag);
+                                           int flag);
+    void update_terminal_cost_with_tconstr(vector<TConstrData<T, xs>>& tconstrsData,
+                                           vector<AL_Param_Struct<T>>& al_params);
+    void update_terminal_cost_par_with_tconstr(vector<TConstrData<T, xs>>& tconstrsData,
+                                           vector<AL_Param_Struct<T>>& al_params);                                                                                      
 
 private:
     shared_ptr<Trajectory<T,xs,us,ys>> traj;

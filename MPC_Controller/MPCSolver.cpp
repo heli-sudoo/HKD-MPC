@@ -28,7 +28,7 @@ void MPCSolver<T>::initialize()
     ddp_options.update_regularization = 4;
     ddp_options.max_DDP_iter = 10;
     ddp_options.max_AL_iter = 15;
-    ddp_options.DDP_thresh = 1e-02;
+    ddp_options.cost_thresh = 1e-02;
     ddp_options.AL_active = 1;
     ddp_options.ReB_active = 0;
     ddp_options.pconstr_thresh = .003;

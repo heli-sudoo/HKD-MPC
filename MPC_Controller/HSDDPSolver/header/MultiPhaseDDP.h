@@ -88,6 +88,8 @@ private:
     int n_phases;
 
     T actual_cost;
+    T merit;
+    T feas;
     // T exp_cost_change;
     T dV_1;         // expected cost change due to first order
     T dV_2;         // expected cost change due to second order

@@ -15,9 +15,11 @@ struct HSDDP_OPTION
     double update_ReB = 7;            // update barrier function weighting
     double max_DDP_iter = 3;          // maximum inner loop iteration
     double max_AL_iter = 2;           // maximum outer loop iteration/*  */
-    double DDP_thresh = 1e-03;        // inner loop convergence threshhold
+    double cost_thresh = 1e-03;        // inner loop convergence threshhold
     double tconstr_thresh = 1e-03;
     double pconstr_thresh = 1e-03;
+    double dynamics_feas_thresh = 1e-03;    // threshold to accept dynamics infeasibility
+    double merit_rho = 1e03;          // weighting parameter for merit function
     bool AL_active = 1;               // activate terminal constraint
     bool ReB_active = 1;              // activate path constraint
     bool smooth_active = 0;           // activate control smoothness penalization

@@ -80,7 +80,7 @@ public:
 
     virtual void reset_params() {}
 
-    virtual T measure_dynamics_feasibility() {return 0;}    
+    virtual T measure_dynamics_feasibility(int norm_id) {return 0;}    
 
 };
 

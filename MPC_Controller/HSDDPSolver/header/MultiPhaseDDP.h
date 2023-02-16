@@ -82,7 +82,7 @@ public:
         max_pconstr_prev = 0;
     }
 
-    T measure_dynamics_feasibility();    
+    T measure_dynamics_feasibility(int norm_id=2);    
 
 private:
     int n_phases;

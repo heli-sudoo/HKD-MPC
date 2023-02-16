@@ -468,13 +468,13 @@ void MultiPhaseDDP<T>::update_nominal_trajectory()
 }
 
 template <typename T>
-T MultiPhaseDDP<T>::measure_dynamics_feasibility()
+T MultiPhaseDDP<T>::measure_dynamics_feasibility(int norm_id)
 {
     T feas = 0;
 
     for (auto &phase : phases)
     {
-        feas += phase->measure_dynamics_feasibility();
+        feas += phase->measure_dynamics_feasibility(norm_id);
     }
 
     return feas;

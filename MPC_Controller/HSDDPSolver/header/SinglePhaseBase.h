@@ -40,19 +40,21 @@ public:
 
     virtual void LQ_approximation(HSDDP_OPTION&) = 0;
 
-    virtual bool backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime) = 0;
+    virtual bool backward_sweep(T regularization, DVec<T> Gprime, DMat<T> Hprime) = 0;
     
     virtual DVec<T> resetmap(DVec<T>&) = 0;
 
-    virtual void resetmap_partial(DMat<T>&, DVec<T>&) = 0;
+    virtual void resetmap_partial(DMat<T>& Px, DVec<T>& x) = 0;
 
-    virtual void get_value_info_at_init(T& dV, DVec<T>& G, DMat<T>& H) = 0;
+    virtual void get_value_approx(DVec<T>& G, DMat<T>& H) = 0;
 
-    virtual DVec<T> get_terminal_state() = 0;
+    virtual void get_exp_cost_change(T& dV_1, T& dV_2) = 0;
 
-    virtual DVec<T> get_terminal_state_dx() = 0;
+    virtual void get_terminal_state(DVec<T>& xend) = 0;
 
-    virtual DVec<T> get_terminal_state_nominal(){}
+    virtual void get_terminal_state(DVec<T>& xend, DVec<T>& xsim_end) = 0;
+
+    virtual void get_terminal_state_dx(DVec<T>& dx_end) = 0;
 
     virtual T get_actual_cost() = 0;   
 

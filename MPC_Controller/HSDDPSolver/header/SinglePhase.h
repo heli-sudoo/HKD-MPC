@@ -111,19 +111,21 @@ public:
 
     void LQ_approximation(HSDDP_OPTION&) override;
 
-    bool backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime) override;
+    bool backward_sweep(T regularization, DVec<T> Gprime, DMat<T> Hprime) override;
 
     DVec<T> resetmap(DVec<T>& x_) override;
 
-    void resetmap_partial(DMat<T>& Px_, DVec<T>& x_) override;
+    void resetmap_partial(DMat<T>& Px_, DVec<T>& x_) override;    
 
-    void get_value_info_at_init(T&dV, DVec<T> &G, DMat<T> &H) override;
+    void get_value_approx(DVec<T>& G_out, DMat<T>& H_out) override;
 
-    DVec<T> get_terminal_state() override;
+    void get_exp_cost_change(T& dV_1_out, T& dV_2_out) override;
 
-    DVec<T> get_terminal_state_dx() override;
+    void get_terminal_state(DVec<T>& xend_out) override;
 
-    DVec<T> get_terminal_state_nominal() override;
+    void get_terminal_state(DVec<T>& xend_out, DVec<T>& xsim_end_out) override;
+
+    void get_terminal_state_dx(DVec<T>& dx_end_out) override;
 
     T get_actual_cost() override;
 
@@ -240,6 +242,8 @@ private:
     VecM<T, xs> dx_init;
 
     T actual_cost;
+    T dV_1;     // expected cost change (first-order term)
+    T dV_2;     // expected cost change (second-order term)
 };
 
 #endif // SINGLEPHASE_HSDDP

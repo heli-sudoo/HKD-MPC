@@ -25,7 +25,7 @@ public:
         phases = phases_in;
         n_phases = phases.size();
         actual_cost = 0;
-        exp_cost_change = 0;
+        // exp_cost_change = 0;
         max_pconstr = 0;
         max_pconstr_prev = 0;
         max_tconstr = 0;
@@ -45,7 +45,7 @@ public:
 
     void hybrid_rollout(T eps, HSDDP_OPTION& option);
 
-    void line_search(HSDDP_OPTION& option);
+    bool line_search(HSDDP_OPTION& option);
 
     void LQ_approximation(HSDDP_OPTION& option);
 
@@ -67,7 +67,7 @@ public:
 
     T get_actual_cost() {return actual_cost;}
 
-    T get_exp_cost_change() {return exp_cost_change;}
+    // T get_exp_cost_change() {return exp_cost_change;}
 
     void empty_solution(){
         for (auto phase:phases)
@@ -76,7 +76,7 @@ public:
         }        
         phases.clear();
         actual_cost = 0;
-        exp_cost_change = 0;
+        // exp_cost_change = 0;
         max_tconstr = 0;
         max_pconstr = 0;
         max_tconstr_prev = 0;
@@ -85,11 +85,13 @@ public:
 
     T check_dynamics_feasibility();    
 
-public:
+private:
     int n_phases;
 
     T actual_cost;
-    T exp_cost_change;
+    // T exp_cost_change;
+    T dV_1;         // expected cost change due to first order
+    T dV_2;         // expected cost change due to second order
 
     T max_tconstr_prev;
     T max_pconstr_prev;

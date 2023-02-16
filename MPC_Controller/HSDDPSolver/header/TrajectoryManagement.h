@@ -65,7 +65,7 @@ public:
 
     /* Shared pointers to hold value function approximation */
     deque<T> V;
-    deque<T> dV;
+    deque<T> dV;    
     deque<VecM<T, us>> dU;
     deque<VecM<T, xs>> G;
     deque<MatMN<T, xs, xs>> H;

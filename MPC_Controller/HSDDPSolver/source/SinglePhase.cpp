@@ -35,7 +35,7 @@ void SinglePhase<T, xs, us, ys>::initialization()
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::set_initial_condition(DVec<T> &x0_)
 {
-    X->at(0) = x0_;
+    x_init = x0_;
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -77,29 +77,37 @@ void SinglePhase<T, xs, us, ys>::resetmap_partial(DMat<T> &Px_, DVec<T> &x_)
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-void SinglePhase<T, xs, us, ys>::get_value_info_at_init(T &dV_, DVec<T> &G_, DMat<T> &H_)
+void SinglePhase<T, xs, us, ys>::get_value_approx(DVec<T> &G_out, DMat<T> &H_out)
 {
-    dV_ = dV->at(0);
-    G_ = G->at(0);
-    H_ = H->at(0);
+    G_out = G->at(0);
+    H_out = H->at(0);
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state()
+void SinglePhase<T, xs, us, ys>::get_exp_cost_change(T& dV_1_out, T& dV_2_out)
 {
-    return X->back();
+    dV_1_out = dV_1;
+    dV_1_out = dV_2;
+}
+
+
+template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::get_terminal_state(DVec<T>& xend_out)
+{
+    xend_out = X->back();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state_dx()
+void SinglePhase<T, xs, us, ys>::get_terminal_state(DVec<T>& xend_out, DVec<T>& xsim_end_out)
 {
-    return dX->back();
+    xend_out = X->back();
+    xsim_end_out = Xsim->back();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-DVec<T> SinglePhase<T, xs, us, ys>::get_terminal_state_nominal()
+void SinglePhase<T, xs, us, ys>::get_terminal_state_dx(DVec<T>& dx_end_out)
 {
-    return Xbar->back();
+    dx_end_out = dX->back();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -129,19 +137,15 @@ void SinglePhase<T, xs, us, ys>::set_trajectory(shared_ptr<Trajectory<T, xs, us,
 
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, bool calc_partial)
-{
-    V->at(0) = 0;
-    T Vprev = 0;
+{    
     actual_cost = 0;
-    VecM<T, xs> delta_x;
-    VecM<T, us> delta_u;
-    VecM<T, ys> delta_y;
     vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
     vector<TConstrData<T, xs>> tconstrsData;
     vector<REB_Param_Struct<T>> reb_params;
     vector<AL_Param_Struct<T>> al_params;
 
     int k = 0;
+    X->at(0) = x_init;
     for (k = 0; k < phase_horizon; k++)
     {
         /* update control */
@@ -168,16 +172,13 @@ void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, bool
             constraintContainer.get_path_constraints(pconstrsData, k);
             constraintContainer.get_reb_params(reb_params, k);
             update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, calc_partial);
-        }
-        // V->at(k) = Vprev + rcostData->at(k).l;
-        // Vprev = V->at(k);
+        }        
         actual_cost += rcostData->at(k).l;
     }
     /* compute terminal cost and its partials */
     costContainer.terminal_cost(*tcostData, X->at(k), k);
     if (calc_partial)
-    {
-        // costContainer.terminal_cost_par(*tcostData, delta_x);
+    {        
         costContainer.terminal_cost_par(*tcostData, X->at(k), k);
     }
     /* compute terminal constraint */
@@ -188,8 +189,7 @@ void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, bool
         constraintContainer.get_terminal_constraints(tconstrsData);
         constraintContainer.get_al_params(al_params);
         update_terminal_cost_with_tconstr(tconstrsData, al_params, calc_partial);
-    }
-    // V->at(phase_horizon) = Vprev + tcostData->Phi;
+    }    
     actual_cost += tcostData->Phi;
 }
 
@@ -203,9 +203,9 @@ void SinglePhase<T, xs, us, ys>::linear_rollout(T eps, HSDDP_OPTION &option)
 {
     VecM<T, us> duk;
 
-    T exp_cost_change_1(0);
-    T exp_cost_change_2(0);
     
+    dV_1 = 0;
+    dV_2 = 0;    
     dX->at(0) = dx_init;
     for (int k = 0; k < phase_horizon; k++)
     {
@@ -224,92 +224,79 @@ void SinglePhase<T, xs, us, ys>::linear_rollout(T eps, HSDDP_OPTION &option)
         duk = eps * uff_k + Kk * dxk;
         dX->at(k + 1) = Ak * dxk + Bk * duk + eps * Defect->at(k + 1);
 
-        exp_cost_change_1 += qk.dot(dxk) + rk.dot(duk);
-        exp_cost_change_2 += 0.5 * dxk.transpose() * Qk * dxk;
-        exp_cost_change_2 += 0.5 * duk.transpose() * Rk * duk;
-        exp_cost_change_2 += 0.5 * duk.transpose() * Pk * dxk;
+        dV_1 += qk.dot(dxk) + rk.dot(duk);
+        dV_2 += 0.5 * dxk.transpose() * Qk * dxk;
+        dV_2 += 0.5 * duk.transpose() * Rk * duk;
+        dV_2 += 0.5 * duk.transpose() * Pk * dxk;
     }
 
     // Terminal state
     auto &dxk = dX->back();
-    exp_cost_change_1 += tcostData->Phix.dot(dxk);
-    exp_cost_change_2 += 0.5 * dxk.transpose() * tcostData->Phixx * dxk;
+    dV_1 += tcostData->Phix.dot(dxk);
+    dV_2 += 0.5 * dxk.transpose() * tcostData->Phixx * dxk;
 }
 
 /* Equivalent to system roll-out when eps = 0 */
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option)
-{
-    VecM<T, xs> dxk;
-    VecM<T, xs> xk_next;
+{    
     const auto &SS_set = option.SS_set; // set of the shooting state time index (relative to the current phase)
-
+    actual_cost = 0;
     vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
     vector<TConstrData<T, xs>> tconstrsData;
     vector<REB_Param_Struct<T>> reb_params;
     vector<AL_Param_Struct<T>> al_params;
-
-    // V->at(0) = 0;
-    // T Vprev = 0;
-    actual_cost = 0;
+   
+    int k = 0;
     X->at(0) = x_init;
     Xsim->at(0) = xsim_init;
-
-    int k = 0;
-    for (int k = 0; k < phase_horizon; k++)
+    for (k = 0; k < phase_horizon; k++)
     {
-        dxk = X->at(k) - Xbar->at(k);
-
-        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * dxk;
-
-        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-
-        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));                
-
+        /* update control */
+        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * (X->at(k) - Xbar->at(k));
+        /* run dynamics */
+        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
+        
         auto it = std::find(SS_set.begin(), SS_set.end(), k + 1);
-        if (it == SS_set.end()) // if k is a roll-out state        
+        if (it == SS_set.end()) 
+        // if k+1 is a roll-out state        
         {
             X->at(k + 1) = Xsim->at(k + 1);
         }
-        else // if k is a shooting state
+        else 
+        // if k is a shooting state
         {
             X->at(k + 1) = Xbar->at(k+1) + eps * dX->at(k+1);
         }
-        
+        X->at(k + 1) = Xsim->at(k + 1);
+
         /* compute running cost*/
         costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-
+       
         /* compute path constraints */
         constraintContainer.compute_path_constraints(X->at(k), U->at(k), Y->at(k), k);
-
         /* update running cost with path constraints using ReB method */
         if (option.ReB_active)
         {
             constraintContainer.get_path_constraints(pconstrsData, k);
             constraintContainer.get_reb_params(reb_params, k);
             update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, 0);
-        }
-
-        // V->at(k) = Vprev + rcostData->at(k).l;
-        // Vprev = V->at(k);
+        }        
         actual_cost += rcostData->at(k).l;
     }
-
-     /* compute terminal cost and its partials */
+    /* compute terminal cost and its partials */
     costContainer.terminal_cost(*tcostData, X->at(k), k);
-    
+   
     /* compute terminal constraint */
     constraintContainer.compute_terminal_constraints(X->at(k));
-
     /* update terminal cost with terminal constraint using AL */
     if (option.AL_active)
     {
         constraintContainer.get_terminal_constraints(tconstrsData);
         constraintContainer.get_al_params(al_params);
         update_terminal_cost_with_tconstr(tconstrsData, al_params, 0);
-    }
-    // V->at(phase_horizon) = Vprev + tcostData->Phi;
-    actual_cost = tcostData->Phi;    
+    }    
+    actual_cost += tcostData->Phi;
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -323,9 +310,7 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
     vector<TConstrData<T, xs>> tconstrsData;
     vector<REB_Param_Struct<T>> reb_params;
     vector<AL_Param_Struct<T>> al_params;
-
-    // V->at(0) = 0;
-    // T Vprev = 0;
+    
 
     actual_cost = 0;
     X->at(0) = x_init;
@@ -357,9 +342,7 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
             constraintContainer.get_reb_params(reb_params, k);
             update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, 0);
         }
-
-        // V->at(k) = Vprev + rcostData->at(k).l;
-        // Vprev = V->at(k);
+       
         actual_cost += rcostData->at(k).l;
     }
 
@@ -376,7 +359,6 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
         constraintContainer.get_al_params(al_params);
         update_terminal_cost_with_tconstr(tconstrsData, al_params, 0);
     }
-    // V->at(phase_horizon) = Vprev + tcostData->Phi;
     actual_cost += tcostData->Phi;
 }
 
@@ -414,13 +396,15 @@ void SinglePhase<T, xs, us, ys>::LQ_approximation(HSDDP_OPTION& option)
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-bool SinglePhase<T, xs, us, ys>::backward_sweep(T regularization, T dVprime, DVec<T> Gprime, DMat<T> Hprime)
+bool SinglePhase<T, xs, us, ys>::backward_sweep(T regularization, DVec<T> Gprime, DMat<T> Hprime)
 {
     bool success = true;
-    dV->at(phase_horizon) = dVprime;
+    // dV->at(phase_horizon) = dVprime;
     G->at(phase_horizon) = tcostData->Phix + Gprime;
     H->at(phase_horizon) = tcostData->Phixx + Hprime;
 
+    dV_1 = 0;
+    dV_2 = 0;
     for (int k = phase_horizon - 1; k >= 0; k--)
     {
         // compute Q function approximation
@@ -458,7 +442,10 @@ bool SinglePhase<T, xs, us, ys>::backward_sweep(T regularization, T dVprime, DVe
         K->at(k) = -Quu_inv * Qux;
         G->at(k) = Qx - Qux.transpose() * Quu_inv * Qu;
         H->at(k) = Qxx - Qux.transpose() * Quu_inv * Qux;
-        dV->at(k) = dV->at(k + 1) - Qu.transpose() * Quu.inverse() * Qu;
+        T dV_k = -Qu.transpose()*dU->at(k);        
+        
+        dV_1 -= dV_k;
+        dV_2 += dV_k;
     }
     return success;
 }

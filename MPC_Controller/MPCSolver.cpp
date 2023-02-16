@@ -35,7 +35,7 @@ void MPCSolver<T>::initialize()
     ddp_options.tconstr_thresh = .003;
 
     mpc_config.plan_duration = .5;
-    mpc_config.nsteps_between_mpc = 1;
+    mpc_config.nsteps_between_mpc = 2;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
     opt_ref.initialize_referenceData(mpc_config.plan_duration);

@@ -23,8 +23,8 @@ void MPCSolver<T>::initialize()
 {
     /* Initialize tunning parameters for DDP solver */
     ddp_options.update_penalty = 8;
-    ddp_options.update_relax = 0.1;
-    ddp_options.update_ReB = 50;
+    ddp_options.update_relax = 1;
+    ddp_options.update_ReB = 1;
     ddp_options.update_regularization = 4;
     ddp_options.max_DDP_iter = 10;
     ddp_options.max_AL_iter = 15;
@@ -33,6 +33,8 @@ void MPCSolver<T>::initialize()
     ddp_options.ReB_active = 0;
     ddp_options.pconstr_thresh = .003;
     ddp_options.tconstr_thresh = .003;
+    ddp_options.MS = true;
+    ddp_options.merit_rho = 1e03;
 
     mpc_config.plan_duration = .5;
     mpc_config.nsteps_between_mpc = 2;

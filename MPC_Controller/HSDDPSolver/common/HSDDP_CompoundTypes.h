@@ -4,6 +4,7 @@
 #include "HSDDP_CPPTypes.h"
 #include <cstring>
 
+
 // Structure collecting all HSDDP parameters
 struct HSDDP_OPTION
 {
@@ -19,11 +20,11 @@ struct HSDDP_OPTION
     double tconstr_thresh = 1e-03;
     double pconstr_thresh = 1e-03;
     double dynamics_feas_thresh = 1e-03;    // threshold to accept dynamics infeasibility
-    double merit_rho = 1e03;          // weighting parameter for merit function
+    double merit_rho = 1e04;          // weighting parameter for merit function
     bool AL_active = 1;               // activate terminal constraint
     bool ReB_active = 1;              // activate path constraint
     bool smooth_active = 0;           // activate control smoothness penalization
-    std::vector<int> SS_set;          // shooting state set
+    bool MS = true;          // shooting state set
 };
 
 

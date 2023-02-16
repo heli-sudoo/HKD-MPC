@@ -188,6 +188,7 @@ private:
     int offset; // offset of the current phase to the start of the trajectory
     int phase_horizon;
     T dt;
+    std::vector<int> SS_set;
     
    /* pointers to hold state, control and output trajectory */    
     deque<VecM<T, xs>>* Xbar = nullptr;

@@ -3,7 +3,7 @@
 #include "HSDDP_CompoundTypes.h"
 #include "cTypes.h"
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef TIME_BENCHMARK
 #include <chrono>
@@ -57,9 +57,10 @@ void MultiPhaseDDP<T>::forward_sweep(T eps, HSDDP_OPTION &option, int calc_parti
 template <typename T>
 void MultiPhaseDDP<T>::linear_rollout(T eps, HSDDP_OPTION &option)
 {
-    DVec<T> dx_init;
-    DVec<T> dx_end;
+    DVec<T> dx_init, dx_end;
+    DVec<T> xend, xsim_end;
     DMat<T> Px; // resetmap partial
+    dx0.setZero();
     dx_init = dx0;
 
     for (int i = 0; i < n_phases; i++)
@@ -67,7 +68,8 @@ void MultiPhaseDDP<T>::linear_rollout(T eps, HSDDP_OPTION &option)
         if (i > 0)
         {
             phases[i - 1]->get_terminal_state_dx(dx_end);
-            phases[i - 1]->resetmap_partial(Px, dx_end);
+            phases[i - 1]->get_terminal_state(xend, xsim_end);
+            phases[i - 1]->resetmap_partial(Px, xend);
             dx_init = Px * dx_end;
         }
 
@@ -218,9 +220,9 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
     DVec<T> xend;
     DMat<T> Px;
     size_t xs(0), xs_next(0);
-    T dV_1_temp(0), dV_2_temp(0);
-    dV_1 = 0;
-    dV_2 = 0;
+    // T dV_1_temp(0), dV_2_temp(0);
+    // dV_1 = 0;
+    // dV_2 = 0;
     for (int i = n_phases - 1; i >= 0; i--)
     {
         xs = phases[i]->get_state_dim();
@@ -242,9 +244,9 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
         if (!success)
             return success;
 
-        phases[i]->get_exp_cost_change(dV_1_temp, dV_2_temp);
-        dV_1 += dV_1_temp;
-        dV_2 += dV_2_temp;
+        // phases[i]->get_exp_cost_change(dV_1_temp, dV_2_temp);
+        // dV_1 += dV_1_temp;
+        // dV_2 += dV_2_temp;
     }
     return success;
 }
@@ -289,10 +291,9 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 
 #ifdef TIME_BENCHMARK
         start = high_resolution_clock::now();
-#endif        
-        hybrid_rollout(0, option);    
-
-        printf("total cost = %f, feasibility = %f \n", actual_cost, feas);
+#endif  
+        update_nominal_trajectory();      
+        hybrid_rollout(0, option);            
 
 #ifdef TIME_BENCHMARK
         stop = high_resolution_clock::now();
@@ -305,6 +306,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
         iter_in = 0;
         while (iter_in < option.max_DDP_iter)
         {
+            printf("total cost = %f, feasibility = %f \n", actual_cost, feas);
             iter_in++;
             iter++;
 #ifdef DEBUG
@@ -323,7 +325,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
                 goto bad_solve;
             }
             
-            if (option.SS_set.size()>0)
+            if (option.MS)
             {
                 linear_rollout(1.0, option);
             }
@@ -339,6 +341,9 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
                 actual_cost = cost_prev;
                 merit = merit_prev;
             }
+
+            // std::cout << "Maximum terminal constraints vioation = " << max_tconstr << std::endl;
+            // std::cout << "Maximum path constraint violation = " << max_pconstr << std::endl;
 
 #ifdef TIME_BENCHMARK
             stop = high_resolution_clock::now();

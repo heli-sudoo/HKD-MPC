@@ -24,7 +24,7 @@ void HKDProblem<T>::initialization()
         return;
     }
 
-    grf_reb_param.delta = 1;
+    grf_reb_param.delta = .001;
     grf_reb_param.delta_min = 0.001;
     grf_reb_param.eps = 0.2;
     swing_reb_param.delta = 2;
@@ -40,6 +40,9 @@ void HKDProblem<T>::initialization()
 
         shared_ptr<Trajectory<T,24,24,0>> traj;
         traj = make_shared<Trajectory<T,24,24,0>>(timeStep, horizons[i]);
+
+        // Initial guess using the state reference
+        std::copy(ref_data->Xr[i].begin(), ref_data->Xr[i].end(), traj->X.begin());
         
         phase->set_trajectory(traj);      
 

@@ -258,8 +258,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 
     T cost_prev(0), merit_prev(0);
     bool success = false; // currently defined only for backward sweep
-    bool ReB_active = option.ReB_active;
-    T total_defect_norm = 0;
+    bool ReB_active = option.ReB_active;    
 
 #ifdef TIME_BENCHMARK
     time_ddp.clear();
@@ -293,7 +292,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 #endif        
         hybrid_rollout(0, option);    
 
-        printf("total cost = %f \n", actual_cost);
+        printf("total cost = %f, feasibility = %f \n", actual_cost, feas);
 
 #ifdef TIME_BENCHMARK
         stop = high_resolution_clock::now();
@@ -352,7 +351,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
             // if (cost_prev - actual_cost < option.cost_thresh)
             //     break;
             
-            if (merit_prev - merit < option.cost_thresh)
+            if ((fabs(cost_prev - actual_cost) < option.cost_thresh)&&(feas <= option.dynamics_feas_thresh))
                 break;
 
 #ifdef TIME_BENCHMARK

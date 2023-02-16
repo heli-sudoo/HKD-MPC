@@ -413,14 +413,18 @@ bool SinglePhase<T, xs, us, ys>::backward_sweep(T regularization, DVec<T> Gprime
     for (int k = phase_horizon - 1; k >= 0; k--)
     {
         // compute Q function approximation
-        auto &rcost = rcostData->at(k);
-        auto &Ak = A->at(k);
-        auto &Bk = B->at(k);
-        auto &Ck = C->at(k);
-        auto &Dk = D->at(k);
+        const auto &rcost = rcostData->at(k);
+        const auto &Ak = A->at(k);
+        const auto &Bk = B->at(k);
+        const auto &Ck = C->at(k);
+        const auto &Dk = D->at(k);        
+        const auto &Hnext = H->at(k + 1);
         auto &Gnext = G->at(k + 1);
-        auto &Hnext = H->at(k + 1);
 
+        // account for the defect
+        Gnext += Hnext * Defect->at(k+1);
+
+        // standard update equations for Q
         Qx = rcost.lx + Ak.transpose() * Gnext + Ck.transpose() * rcost.ly;
         Qu = rcost.lu + Bk.transpose() * Gnext + Dk.transpose() * rcost.ly;
         Qxx = rcost.lxx + Ck.transpose() * rcost.lyy * Ck + Ak.transpose() * Hnext * Ak;

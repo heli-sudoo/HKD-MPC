@@ -396,6 +396,15 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
         
 }
 
+template <typename T>
+void MultiPhaseDDP<T>::LQ_approximation(HSDDP_OPTION& option)
+{
+    for (int i = 0; i < n_phases; i++)
+    {
+        phases[i]->LQ_approximation(option);
+    }
+    
+}
 /*
     @brief: Set a method to initialize the dynamics everytime berfore running forward sweep
     @Note:  In future version, this function need modified for general purpose. Currently it supports foothold

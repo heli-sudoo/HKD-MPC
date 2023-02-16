@@ -477,6 +477,11 @@ T MultiPhaseDDP<T>::measure_dynamics_feasibility(int norm_id)
         feas += phase->measure_dynamics_feasibility(norm_id);
     }
 
+    if (norm_id == 2)
+    {
+        feas = sqrt(feas);
+    }
+    
     return feas;
 }
 template class MultiPhaseDDP<double>;

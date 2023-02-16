@@ -153,7 +153,7 @@ public:
 
     void reset_params() override {constraintContainer.reset_params();}
 
-    T check_dynamics_feasibility() override {return traj->dynamics_feasibility();}
+    T measure_dynamics_feasibility() override {return traj->measure_dynamics_feasibility();}
 
     void update_defect() {traj->update_defect();}
 

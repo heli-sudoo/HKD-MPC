@@ -40,7 +40,7 @@ public:
     int size(){return Xbar.size();}
 
     void update_defect();
-    T dynamics_feasibility(int norm_id = 2);
+    T measure_dynamics_feasibility(int norm_id = 2);
 
 public:
     T duration;

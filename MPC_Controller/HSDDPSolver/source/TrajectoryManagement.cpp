@@ -180,7 +180,7 @@ void Trajectory<T, xs, us, ys>::update_defect()
     
 }
 template <typename T, size_t xs, size_t us, size_t ys>
-T Trajectory<T, xs, us, ys>::dynamics_feasibility(int norm_id)
+T Trajectory<T, xs, us, ys>::measure_dynamics_feasibility(int norm_id)
 {
 
     T defect_norm = 0;
@@ -190,15 +190,14 @@ T Trajectory<T, xs, us, ys>::dynamics_feasibility(int norm_id)
         for (auto &defect : Defect)
         {
             defect_norm += defect.template lpNorm<1>();
-        }
-        return defect_norm;
+        }        
     }
 
     for (auto &defect : Defect)
     {
         defect_norm += defect.squaredNorm();
     }
-    return std::sqrt(defect_norm);
+    return defect_norm;
 }
 
 // template class TrajectorySequence<ModelInfo<double,24,24,0>,ModelInfo<double,24,24,0>>;

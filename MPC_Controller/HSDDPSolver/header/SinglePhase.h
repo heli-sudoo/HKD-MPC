@@ -155,6 +155,8 @@ public:
 
     T check_dynamics_feasibility() override {return traj->dynamics_feasibility();}
 
+    void update_defect() {traj->update_defect();}
+
 private:
     void update_trajectory_ptrs();
     

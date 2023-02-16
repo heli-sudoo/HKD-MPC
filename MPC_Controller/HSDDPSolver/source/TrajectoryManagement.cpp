@@ -171,6 +171,15 @@ void Trajectory<T, xs, us, ys>::push_back_zero()
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
+void Trajectory<T, xs, us, ys>::update_defect()
+{
+    for (int k = 0; k <= horizon; k++)
+    {
+        Defect[k] = Xsim[k] - X[k];
+    }
+    
+}
+template <typename T, size_t xs, size_t us, size_t ys>
 T Trajectory<T, xs, us, ys>::dynamics_feasibility(int norm_id)
 {
 

@@ -297,6 +297,7 @@ void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option)
         update_terminal_cost_with_tconstr(tconstrsData, al_params);
     }    
     actual_cost += tcostData->Phi;
+    update_defect();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -360,6 +361,7 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
         update_terminal_cost_with_tconstr(tconstrsData, al_params);
     }
     actual_cost += tcostData->Phi;
+    update_defect();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>

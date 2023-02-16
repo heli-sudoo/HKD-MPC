@@ -39,6 +39,7 @@ public:
     void push_back_zero();
     int size(){return Xbar.size();}
 
+    void update_defect();
     T dynamics_feasibility(int norm_id = 2);
 
 public:

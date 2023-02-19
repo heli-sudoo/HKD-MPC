@@ -38,21 +38,22 @@ public:
     void set_dynamics_init_callback(function<void(DVec<T>)> dynamics_init_callback_);
 
 public:
-    void forward_sweep(T eps, HSDDP_OPTION& option, int);
 
     void linear_rollout(T eps, HSDDP_OPTION& option);
 
     void hybrid_rollout(T eps, HSDDP_OPTION& option);
 
+    void nonlinear_rollout(T eps, HSDDP_OPTION& option);
+
     bool line_search(HSDDP_OPTION& option);
+
+    void compute_cost(const HSDDP_OPTION& option);
 
     void LQ_approximation(HSDDP_OPTION& option);
 
     bool backward_sweep(T regularization);
 
     bool backward_sweep_regularized(T& regularization, HSDDP_OPTION&option);
-
-    bool forward_iteration(HSDDP_OPTION& option);   
 
     void impact_aware_step(DVec<T>&G, DMat<T>&H, const DMat<T>& Px);
 
@@ -62,11 +63,9 @@ public:
 
     void update_AL_params(HSDDP_OPTION& option);
 
-    void update_REB_params(HSDDP_OPTION& option);
+    void update_REB_params(HSDDP_OPTION& option);    
 
     T get_actual_cost() {return actual_cost;}
-
-    // T get_exp_cost_change() {return exp_cost_change;}
 
     void empty_solution(){
         for (auto phase:phases)

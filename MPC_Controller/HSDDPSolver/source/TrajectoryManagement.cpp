@@ -15,6 +15,7 @@ void Trajectory<T, xs, us, ys>::create_data(T timeStep_, int horizon_)
     Y.assign(horizon, VecM<T, ys>::Zero());
 
     Xsim.assign(horizon + 1, VecM<T, xs>::Zero());
+    Defect_bar.assign(horizon + 1, VecM<T, xs>::Zero());
     Defect.assign(horizon + 1, VecM<T, xs>::Zero());
 
     A.assign(horizon + 1, MatMN<T, xs, xs>::Zero());
@@ -43,6 +44,7 @@ void Trajectory<T, xs, us, ys>::clear()
     Y.clear();
 
     Xsim.clear();
+    Defect_bar.clear();
     Defect.clear();
 
     A.clear();
@@ -74,6 +76,7 @@ void Trajectory<T, xs, us, ys>::zero_all()
     set_eigen_deque_zero(Y);
 
     set_eigen_deque_zero(Xsim);
+    set_eigen_deque_zero(Defect_bar);
     set_eigen_deque_zero(Defect);
 
     set_eigen_deque_zero(A);
@@ -107,8 +110,8 @@ template <typename T, size_t xs, size_t us, size_t ys>
 void Trajectory<T, xs, us, ys>::update_nominal_vals()
 {
     std::copy(X.begin(), X.end(), Xbar.begin());
-    std::copy(U.begin(), U.end(), Ubar.begin());
-    // set_eigen_deque_zero(K);
+    std::copy(U.begin(), U.end(), Ubar.begin());    
+    std::copy(Defect.begin(), Defect.end(), Defect_bar.begin());    
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -122,6 +125,7 @@ void Trajectory<T, xs, us, ys>::pop_front()
 
     Xsim.pop_front();
     Defect.pop_front();
+    Defect_bar.pop_front();
 
     A.pop_front();
     B.pop_front();
@@ -152,6 +156,38 @@ void Trajectory<T, xs, us, ys>::push_back_zero()
 
     Xsim.push_back(VecM<T, xs>::Zero());
     Defect.push_back(VecM<T, xs>::Zero());
+    Defect_bar.push_back(VecM<T, xs>::Zero());
+    
+    A.push_back(MatMN<T, xs, xs>::Zero());
+    B.push_back(MatMN<T, xs, us>::Zero());
+    C.push_back(MatMN<T, ys, xs>::Zero());
+    D.push_back(MatMN<T, ys, us>::Zero());
+
+    V.push_back(T(0));
+    dV.push_back(T(0));
+    dU.push_back(VecM<T, us>::Zero());
+    G.push_back(VecM<T, xs>::Zero());
+    H.push_back(MatMN<T, xs, xs>::Zero());
+    K.push_back(MatMN<T, xs, xs>::Zero());
+    dX.push_back(VecM<T, xs>::Zero());
+
+    rcostData.push_back(RCostData<T, xs, us, ys>());
+    horizon++;
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
+void Trajectory<T, xs, us, ys>::push_back_state(const DVec<T>& state_to_add)
+{
+
+    Xbar.push_back(state_to_add);
+    X.push_back(state_to_add);
+    Ubar.push_back(VecM<T, us>::Zero());
+    U.push_back(VecM<T, us>::Zero());
+    Y.push_back(VecM<T, ys>::Zero());
+
+    Xsim.push_back(VecM<T, xs>::Zero());
+    Defect.push_back(VecM<T, xs>::Zero());
+    Defect_bar.push_back(VecM<T, xs>::Zero());
 
     A.push_back(MatMN<T, xs, xs>::Zero());
     B.push_back(MatMN<T, xs, us>::Zero());
@@ -171,7 +207,7 @@ void Trajectory<T, xs, us, ys>::push_back_zero()
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
-void Trajectory<T, xs, us, ys>::update_defect()
+void Trajectory<T, xs, us, ys>::compute_defect()
 {
     for (int k = 0; k <= horizon; k++)
     {

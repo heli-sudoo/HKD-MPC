@@ -36,6 +36,8 @@ public:
       
     void compute_violation(const State&, const Contrl&, const Output&, int k) override;
 
+    void compute_partial(const State&, const Contrl&, const Output&, int k) override;
+
 public:
     VecM<int, 4> ctact_status;
     vector<int> ctact_foot_ids;
@@ -62,6 +64,8 @@ public:
 
     void compute_violation(const State&);
 
+    void compute_partial(const State&);
+    
 private:
     VecM<int, 4> impact_status;
     T ground_height;

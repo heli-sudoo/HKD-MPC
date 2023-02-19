@@ -8,6 +8,7 @@
 #include <deque>
 #include <memory>
 #include <functional>
+#include <numeric>
 #include "HSDDP_CompoundTypes.h"
 #include "SinglePhaseBase.h"
 #include "TrajectoryManagement.h"
@@ -33,8 +34,9 @@ public:
     typedef MatMN<T, ys, xs> OutputMap;
     typedef MatMN<T, ys, us> DirectMap;
 
-public:
     friend class MultiPhaseDDP<T>;
+
+private:
     // function wrapper of Callable dynamics
     function<void(State&, Output&, State&, Contrl&)> dynamics;
     // function wrapper of Callable dynamics linearizaiton
@@ -99,13 +101,11 @@ public:
 
     void set_nominal_initial_condition(DVec<T>& x0_) override;
 
-    void warmstart() override {}
-
-    void forward_sweep(T eps, HSDDP_OPTION& option, int) override;
+    void warmstart() override {}    
 
     void linear_rollout(T eps, HSDDP_OPTION&) override;
 
-    void hybrid_rollout(T eps, HSDDP_OPTION&) override;
+    void hybrid_rollout(T eps, HSDDP_OPTION&, bool is_last_phase = false) override;
 
     void nonlinear_rollout(T eps, HSDDP_OPTION&) override;
 
@@ -155,12 +155,19 @@ public:
 
     T measure_dynamics_feasibility(int norm_id=2) override {return traj->measure_dynamics_feasibility(norm_id);}
 
-    void update_defect() {traj->update_defect();}
+    void compute_defect() {traj->compute_defect();}
+
+    void update_SS_config(int ss_sz) override {
+        SS_set.resize(ss_sz);
+        std::iota(SS_set.begin(), SS_set.end(), 0);
+        }
 
 private:
     void update_trajectory_ptrs();
     
     void compute_barrier(vector<IneqConstrData<T,xs,us,ys>>&, vector<REB_Param_Struct<T>>&); 
+
+    void compute_cost(const HSDDP_OPTION& option);
                                                                                             
     void update_running_cost_with_pconstr(RCostData<T,xs,us,ys>& rcost,
                                           vector<IneqConstrData<T,xs,us,ys>>& pconstrsData,
@@ -188,7 +195,6 @@ private:
     int offset; // offset of the current phase to the start of the trajectory
     int phase_horizon;
     T dt;
-    std::vector<int> SS_set;
     
    /* pointers to hold state, control and output trajectory */    
     deque<VecM<T, xs>>* Xbar = nullptr;
@@ -200,6 +206,7 @@ private:
     /* pointers to hold simulation state, defect etc */
     deque<VecM<T, xs>> *Xsim = nullptr;
     deque<VecM<T, xs>> *Defect = nullptr;
+    deque<VecM<T, xs>> *Defect_bar = nullptr;
 
     /* pointers to hold linearized dynamics */
     deque<MatMN<T, xs, xs>>* A = nullptr;
@@ -221,8 +228,6 @@ private:
     // running cost and terminal cost
     deque<RCostData<T, xs, us, ys>>* rcostData = nullptr;
     TCostData<T, xs>* tcostData  = nullptr;  
-
-    // constraints data
 
 
     // iterators to state, control, output trajectories
@@ -251,7 +256,10 @@ private:
     // Initial condition
     VecM<T, xs> x_init;
     VecM<T, xs> xsim_init;
-    VecM<T, xs> dx_init;
+    VecM<T, xs> dx_init;    
+
+    // Shooting state set
+    std::vector<int> SS_set;
 
     T actual_cost;
     T dV_1;     // expected cost change (first-order term)

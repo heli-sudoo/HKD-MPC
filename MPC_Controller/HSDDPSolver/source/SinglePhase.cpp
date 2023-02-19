@@ -30,7 +30,7 @@ void SinglePhase<T, xs, us, ys>::initialization()
 
     x_init.setZero();
     xsim_init.setZero();
-    dx_init.setZero();
+    dx_init.setZero();    
     SS_set.clear();
 }
 
@@ -136,64 +136,6 @@ void SinglePhase<T, xs, us, ys>::set_trajectory(shared_ptr<Trajectory<T, xs, us,
     update_trajectory_ptrs();
 }
 
-template <typename T, size_t xs, size_t us, size_t ys>
-void SinglePhase<T, xs, us, ys>::forward_sweep(T eps, HSDDP_OPTION &option, int calc_partial)
-{
-    actual_cost = 0;
-    vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
-    vector<TConstrData<T, xs>> tconstrsData;
-    vector<REB_Param_Struct<T>> reb_params;
-    vector<AL_Param_Struct<T>> al_params;
-
-    int k = 0;
-    X->at(0) = x_init;
-    for (k = 0; k < phase_horizon; k++)
-    {
-        /* update control */
-        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * (X->at(k) - Xbar->at(k));
-        /* run dynamics */
-        dynamics(X->at(k + 1), Y->at(k), X->at(k), U->at(k));
-        if (calc_partial)
-        { // This flag is turned off when performing line search for speed up
-            dynamics_partial(A->at(k), B->at(k), C->at(k), D->at(k), X->at(k), U->at(k));
-        }
-        /* compute running cost*/
-        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-        if (calc_partial > 1)
-        {
-            /* compute running cost*/
-            costContainer.running_cost_par(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-        }
-
-        /* compute path constraints */
-        constraintContainer.compute_path_constraints(X->at(k), U->at(k), Y->at(k), k);
-        /* update running cost with path constraints using ReB method */
-        if (option.ReB_active)
-        {
-            constraintContainer.get_path_constraints(pconstrsData, k);
-            constraintContainer.get_reb_params(reb_params, k);
-            update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params, calc_partial);
-        }
-        actual_cost += rcostData->at(k).l;
-    }
-    /* compute terminal cost and its partials */
-    costContainer.terminal_cost(*tcostData, X->at(k), k);
-    if (calc_partial)
-    {
-        costContainer.terminal_cost_par(*tcostData, X->at(k), k);
-    }
-    /* compute terminal constraint */
-    constraintContainer.compute_terminal_constraints(X->at(k));
-    /* update terminal cost with terminal constraint using AL */
-    if (option.AL_active)
-    {
-        constraintContainer.get_terminal_constraints(tconstrsData);
-        constraintContainer.get_al_params(al_params);
-        update_terminal_cost_with_tconstr(tconstrsData, al_params, calc_partial);
-    }
-    actual_cost += tcostData->Phi;
-}
-
 /*
 brief:
     Obtain the search direction dX for the shooting state using the linearized dynaamics
@@ -237,48 +179,59 @@ void SinglePhase<T, xs, us, ys>::linear_rollout(T eps, HSDDP_OPTION &option)
 
 /* Equivalent to system roll-out when eps = 0 */
 template <typename T, size_t xs, size_t us, size_t ys>
-void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option)
-{
-    actual_cost = 0;
+void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option, bool is_last_phase)
+{            
+    int k = 0;
+    X->at(0) = x_init;
+    Xsim->at(0) = xsim_init;
+    
+    for (k = 0; k < phase_horizon; k++)
+    {
+        /* update control */
+        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * (X->at(k) - Xbar->at(k));
+
+        /* run dynamics */
+        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
+
+        /* check wether k+1 is a shooting state */
+        auto it = std::find(SS_set.begin(), SS_set.end(), k + 1);
+
+        /* If k+1 is a shooting state, and multiple shooting is set to true*/
+        if ((option.MS) && (SS_set.size()>0) && (it != SS_set.end()))
+        {
+            X->at(k + 1) = Xbar->at(k + 1) + eps * dX->at(k + 1);
+        }else
+        {
+            X->at(k + 1) = Xsim->at(k + 1);
+        }
+
+        /* compute path constraints */
+        constraintContainer.compute_path_constraints(X->at(k), U->at(k), Y->at(k), k);          
+    }    
+
+    /* compute terminal constraint */
+    constraintContainer.compute_terminal_constraints(X->at(k));
+
+    /* compute defect */
+    compute_defect();
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::compute_cost(const HSDDP_OPTION& option)
+{    
     vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
     vector<TConstrData<T, xs>> tconstrsData;
     vector<REB_Param_Struct<T>> reb_params;
     vector<AL_Param_Struct<T>> al_params;
 
-    SS_set.clear();
-    if (option.MS)
-    {
-        SS_set.resize(phase_horizon + 1);
-        std::iota(SS_set.begin(), SS_set.end(), 0); // assume every step is a shooting state
-    }
+    int k =0;
+    actual_cost = 0;
 
-    int k = 0;
-    X->at(0) = x_init;
-    Xsim->at(0) = xsim_init;
     for (k = 0; k < phase_horizon; k++)
     {
-        /* update control */
-        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * (X->at(k) - Xbar->at(k));
-        /* run dynamics */
-        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
-
-        auto it = std::find(SS_set.begin(), SS_set.end(), k + 1);
-        if (it == SS_set.end())
-        // if k+1 is a roll-out state
-        {
-            X->at(k + 1) = Xsim->at(k + 1);
-        }
-        else
-        // if k is a shooting state
-        {
-            X->at(k + 1) = Xbar->at(k + 1) + eps * dX->at(k + 1);
-        }
-
         /* compute running cost*/
         costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-
-        /* compute path constraints */
-        constraintContainer.compute_path_constraints(X->at(k), U->at(k), Y->at(k), k);
+        
         /* update running cost with path constraints using ReB method */
         if (option.ReB_active)
         {
@@ -286,13 +239,12 @@ void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option)
             constraintContainer.get_reb_params(reb_params, k);
             update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params);
         }
-        actual_cost += rcostData->at(k).l;
+        actual_cost += rcostData->at(k).l;           
     }
-    /* compute terminal cost and its partials */
+    
+    /* compute terminal cost */
     costContainer.terminal_cost(*tcostData, X->at(k), k);
 
-    /* compute terminal constraint */
-    constraintContainer.compute_terminal_constraints(X->at(k));
     /* update terminal cost with terminal constraint using AL */
     if (option.AL_active)
     {
@@ -300,8 +252,7 @@ void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option)
         constraintContainer.get_al_params(al_params);
         update_terminal_cost_with_tconstr(tconstrsData, al_params);
     }
-    actual_cost += tcostData->Phi;
-    update_defect();
+    actual_cost += tcostData->Phi;   
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -314,11 +265,10 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
     vector<REB_Param_Struct<T>> reb_params;
     vector<AL_Param_Struct<T>> al_params;
 
+    int k = 0;
     actual_cost = 0;
     X->at(0) = x_init;
-    Xsim->at(0) = xsim_init;
-
-    int k = 0;
+    Xsim->at(0) = xsim_init;    
     for (int k = 0; k < phase_horizon; k++)
     {
         dxk = X->at(k) - Xbar->at(k);
@@ -329,7 +279,7 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
 
         dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
 
-        X->at(k + 1) = Xsim->at(k + 1) - (1 - eps) * Defect->at(k + 1);
+        X->at(k + 1) = Xsim->at(k + 1) - (1 - eps) * Defect_bar->at(k + 1);
 
         /* compute running cost*/
         costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
@@ -362,7 +312,7 @@ void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
         update_terminal_cost_with_tconstr(tconstrsData, al_params);
     }
     actual_cost += tcostData->Phi;
-    update_defect();
+    compute_defect();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
@@ -376,12 +326,17 @@ void SinglePhase<T, xs, us, ys>::LQ_approximation(HSDDP_OPTION &option)
     int k = 0;
     /* LQ approximation for all intermediate states */
     for (k = 0; k < phase_horizon; k++)
-    {
+    {   
+        /* compute dynamics partial*/
         dynamics_partial(A->at(k), B->at(k), C->at(k), D->at(k), X->at(k), U->at(k));
 
+        /* compute running cost partial*/
         costContainer.running_cost_par(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
 
-        /* update running cost with path constraints using ReB method */
+        /* compute path constraints partial*/
+        constraintContainer.compute_path_constraints_par(X->at(k), U->at(k), Y->at(k), k);
+
+        /* update running cost partial with path constraints using ReB method */
         if (option.ReB_active)
         {
             constraintContainer.get_path_constraints(pconstrsData, k);
@@ -390,7 +345,11 @@ void SinglePhase<T, xs, us, ys>::LQ_approximation(HSDDP_OPTION &option)
         }
     }
 
+    /* compute terminal cost partial*/
     costContainer.terminal_cost_par(*tcostData, X->at(k), k);
+
+    /* compute terminal constraint partial*/
+    constraintContainer.compute_terminal_constraints_par(X->at(k));
 
     /* update terminal cost with terminal constraint using AL */
     if (option.AL_active)
@@ -656,6 +615,7 @@ void SinglePhase<T, xs, us, ys>::update_trajectory_ptrs()
 
     Xsim = &(traj->Xsim);
     Defect = &(traj->Defect);
+    Defect_bar = &(traj->Defect_bar);
     dX = &(traj->dX);
 
     V = &(traj->V);
@@ -687,7 +647,8 @@ void SinglePhase<T, xs, us, ys>::update_REB_params(HSDDP_OPTION &option)
 template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::push_back()
 {
-    traj->push_back_zero();
+    // traj->push_back_zero();
+    traj->push_back_state(traj->X.back());
     constraintContainer.push_back_n(1);
     phase_horizon = traj->horizon;
 }

@@ -16,41 +16,15 @@ public:
         Qw.setZero();
         Qv.setZero();
         QqJ.setZero();
-
-        // TOWR
-        // Qeul.diagonal() << 1, 6, 6;
-        // Qpos.diagonal() << 0, 0, 50;
-        // Qw.diagonal() << .2, .2, .2;
-        // Qv.diagonal() << 4, 4, 4;
-        // QqJ.diagonal() << VecM<T, 3>::Constant(1 * (1 - contact[0])),
-        //                 VecM<T, 3>::Constant(1 * (1 - contact[1])),
-        //                 VecM<T, 3>::Constant(1 * (1 - contact[2])),
-        //                 VecM<T, 3>::Constant(1 * (1 - contact[3]));
-        // this->Q.topLeftCorner(3, 3) << Qeul;
-        // this->Q.block(3, 3, 3, 3) << Qpos;
-        // this->Q.block(6, 6, 3, 3) << Qw;
-        // this->Q.block(9, 9, 3, 3) << Qv;
-        // this->Q.bottomRightCorner(12, 12) << QqJ;
-
-        // /* Terminal state weighting matrix */
-        // VecM<T, 24> scale;
-        // scale << 1, 1, 1, 2, 2, 15, 1, 1, 1, 1, 1, 1, .2 * VecM<T, 12>::Ones();
-        // this->Qf = 20 * scale.asDiagonal() * this->Q;
-
-        // /* Control weighting matrices */
-        // this->R.setZero();
-        // this->R.topLeftCorner(12, 12) = .08 * MatMN<T, 12, 12>::Identity();      // GRF
-        // this->R.bottomRightCorner(12, 12) = .01 * MatMN<T, 12, 12>::Identity();  // Commanded joint vel
-
-        // Bouding
+                
         Qeul.diagonal() << 1, 4, 5;
         Qpos.diagonal() << .2, 1, 30;
         Qw.diagonal() << .2, .2, .2;
         Qv.diagonal() << 4, 1, .5;
-        QqJ.diagonal() << VecM<T, 3>::Constant(.5 * (1 - contact[0])),
-                        VecM<T, 3>::Constant(.5 * (1 - contact[1])),
-                        VecM<T, 3>::Constant(.5 * (1 - contact[2])),
-                        VecM<T, 3>::Constant(.5 * (1 - contact[3]));
+        QqJ.diagonal() << VecM<T, 3>::Constant(.2 * (1 - contact[0])),
+                        VecM<T, 3>::Constant(.2 * (1 - contact[1])),
+                        VecM<T, 3>::Constant(.2 * (1 - contact[2])),
+                        VecM<T, 3>::Constant(.2 * (1 - contact[3]));
         this->Q.topLeftCorner(3, 3) << Qeul;
         this->Q.block(3, 3, 3, 3) << Qpos;
         this->Q.block(6, 6, 3, 3) << Qw;
@@ -63,7 +37,7 @@ public:
                   .2, 1, 20, 
                   .3, .3, .3, 
                   1, 3, 1, 
-                  .2 * VecM<T, 12>::Ones();
+                  .01 * VecM<T, 12>::Ones();
         this->Qf = 20 * scale.asDiagonal() * this->Q;
 
         /* Control weighting matrices */

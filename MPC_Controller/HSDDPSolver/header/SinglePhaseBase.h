@@ -30,11 +30,9 @@ public:
 
     virtual void set_nominal_initial_condition(DVec<T>& x0_){} // initial condition of the nominal trajectory
 
-    virtual void forward_sweep(T eps, HSDDP_OPTION&, int) = 0; // compute both dynamics propagation and dynamics partials
-
     virtual void linear_rollout(T eps, HSDDP_OPTION&) = 0;
 
-    virtual void hybrid_rollout(T eps, HSDDP_OPTION&) = 0;
+    virtual void hybrid_rollout(T eps, HSDDP_OPTION&, bool is_last_phase = false) = 0;
 
     virtual void nonlinear_rollout(T eps, HSDDP_OPTION&) = 0;
 
@@ -81,6 +79,10 @@ public:
     virtual void reset_params() {}
 
     virtual T measure_dynamics_feasibility(int norm_id) {return 0;}    
+
+    virtual void update_SS_config(int ss_sz) {}
+
+    virtual void compute_cost(const HSDDP_OPTION& option) = 0;
 
 };
 

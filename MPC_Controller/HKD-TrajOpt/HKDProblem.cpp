@@ -16,6 +16,7 @@ void HKDProblem<T>::initialization()
 {
     deque<int> &horizons = ref_data->horizons;    
     deque<VecM<int, 4>> &ctactSeq = ref_data->contactSeq;
+    std::vector<int> SS_set;    // set of shooting state for one phase
     int n_phases = ref_data->n_phases;
     // check if the size of contactSeq greater
     if (n_phases >= ctactSeq.size())
@@ -24,9 +25,9 @@ void HKDProblem<T>::initialization()
         return;
     }
 
-    grf_reb_param.delta = .001;
+    grf_reb_param.delta = 1;
     grf_reb_param.delta_min = 0.001;
-    grf_reb_param.eps = 0.2;
+    grf_reb_param.eps = .01;
     swing_reb_param.delta = 2;
     swing_reb_param.delta_min = 0.01;
     swing_reb_param.eps = 0.02;
@@ -41,9 +42,10 @@ void HKDProblem<T>::initialization()
         shared_ptr<Trajectory<T,24,24,0>> traj;
         traj = make_shared<Trajectory<T,24,24,0>>(timeStep, horizons[i]);
 
-        // Initial guess using the state reference
+        // Initialize state trajectory using the state reference
         std::copy(ref_data->Xr[i].begin(), ref_data->Xr[i].end(), traj->X.begin());
         
+        // Add trajectory to the corresponding phase
         phase->set_trajectory(traj);      
 
         bool is_add_tconstr = true;
@@ -60,6 +62,9 @@ void HKDProblem<T>::initialization()
 
         phase->initialization();
 
+         // Configure the set of shooting state        
+        phase->update_SS_config(horizons[i]+1);
+
         pdata->trajectory_ptrs.push_back(traj);
         pdata->phase_ptrs.push_back(phase);
     }
@@ -72,21 +77,8 @@ template <typename T>
 void HKDProblem<T>::update()
 {
     // use smaller relaxation parameter
-    grf_reb_param.delta = .01;
-    grf_reb_param.eps = 1;
-
-    /* obtain the previous solutions */
-    // Xbar_prev.clear();
-    // Ubar_prev.clear();
-    // Xbar_prev.resize(ref_data->n_phases);
-    // Ubar_prev.resize(ref_data->n_phases);
-    // for (int i = 0; i < ref_data->n_phases; i++)
-    // {
-    //     std::copy(pdata->trajectory_ptrs[i]->Xbar.begin(), pdata->trajectory_ptrs[i]->Xbar.end(),
-    //                 std::back_inserter(Xbar_prev[i]));
-    //     std::copy(pdata->trajectory_ptrs[i]->Ubar.begin(), pdata->trajectory_ptrs[i]->Ubar.end(),
-    //                 std::back_inserter(Ubar_prev[i]));
-    // }
+    grf_reb_param.delta = .1;
+    grf_reb_param.eps = .1;   
     
     for (int j = 0; j < nsteps_between_mpc; j++)
     {
@@ -102,21 +94,16 @@ void HKDProblem<T>::update()
         {
             trajectories.pop_front();
             phases.pop_front();
-
-            // Xbar_prev.pop_front();
-            // Ubar_prev.pop_front();
         }
         else
         {
-            phases[0]->pop_front();
-            // Xbar_prev[0].pop_front();
-            // Ubar_prev[0].pop_front();
+            phases[0]->pop_front();                        
         }
         // If trajectories is shorter than expected # phases, grow trajectories and phases by one
         if (trajectories.size() < ref_data->n_phases)
         {
             shared_ptr<Trajectory<T, 24, 24, 0>> traj_to_add;
-            traj_to_add = make_shared<Trajectory<T, 24, 24, 0>>(timeStep, horizons.back());
+            traj_to_add = make_shared<Trajectory<T, 24, 24, 0>>(timeStep, horizons.back());            
 
             shared_ptr<SinglePhase<T, 24, 24, 0>> phase_to_add;
             phase_to_add = make_shared<SinglePhase<T, 24, 24, 0>>();             
@@ -143,11 +130,26 @@ void HKDProblem<T>::update()
         }
         
     }
-    for (auto phase : pdata->phase_ptrs)
+
+    int n_phases = pdata->phase_ptrs.size();
+    for (int i = 0; i < n_phases; i++)
     {
-        phase->reset_params();
+        pdata->phase_ptrs[i]->reset_params();
+        
+        if (i==n_phases-1)
+        {
+            if (ref_data->horizons[i]>1)
+            {
+                pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]);
+            }            
+            
+        }else
+        {
+            pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]+1);
+        }        
+        
     }
-    
+       
 }
 
 template<typename T>
@@ -198,16 +200,6 @@ void HKDProblem<T>::create_problem_one_phase(shared_ptr<SinglePhase<T,24,24,0>> 
     foot_reg = make_shared<HKDFootPlaceReg<T>>(ctact);
     foot_reg->set_reference(&(ref_data->Xr[idx]));
     phase->add_cost(foot_reg);
-
-    // // previous solution regularization
-    // if (idx < Xbar_prev.size())
-    // {
-    //     shared_ptr<PrevSolution_Reg<T>> prev_reg;
-    //     prev_reg = make_shared<PrevSolution_Reg<T>>(ctact);
-    //     prev_reg->set_state_reference(&(Xbar_prev[idx]));
-    //     prev_reg->set_control_reference(&(Ubar_prev[idx]));
-    //     phase->add_cost(prev_reg);
-    // }
     
 
     /* add constraints */

@@ -40,10 +40,21 @@ void GRFConstraint<T>::compute_violation(const State &x, const Contrl &u, const 
 
     for (int i = 0; i < this->data[k].size(); i++)
     {
-        this->data[k][i].g = A.row(i) * u;
-        this->data[k][i].gu = A.row(i).transpose();
+        this->data[k][i].g = A.row(i) * u;        
     }
     this->update_max_violation(k);
+}
+
+template <typename T>
+void GRFConstraint<T>::compute_partial(const State &x, const Contrl &u, const Output &y, int k)
+{
+    unused_ignore(x);
+    unused_ignore(y);
+
+    for (int i = 0; i < this->data[k].size(); i++)
+    {        
+        this->data[k][i].gu = A.row(i).transpose();
+    }
 }
 
 template <typename T>
@@ -74,8 +85,6 @@ void TouchDownConstraint<T>::compute_violation(const State &x)
     VecM<T, 3> pFoot;
     VecM<T, 3> eul, pos, qleg;
     VecM<T, 12> qdummy;
-    MatMN<T, 3, 18> Jf;
-    VecM<T, 18> Jz;
 
     eul = x.head(3);
     pos = x.segment(3, 3);
@@ -95,10 +104,35 @@ void TouchDownConstraint<T>::compute_violation(const State &x)
         casadi_interface(arg_pos, res_pos, pFoot.size(), compute_foot_position,
                          compute_foot_position_sparsity_out,
                          compute_foot_position_work);
-
+        
         // compute constraint violation
         this->data[i].h = pFoot[2] - ground_height;
+       
+    }
+    this->update_max_violation();
+}
 
+template <typename T>
+void TouchDownConstraint<T>::compute_partial(const State &x)
+{
+    /* compute foot positions using the casadi interface */    
+    VecM<T, 3> eul, pos, qleg;
+    VecM<T, 12> qdummy;
+    MatMN<T, 3, 18> Jf;
+    VecM<T, 18> Jz;
+
+    eul = x.head(3);
+    pos = x.segment(3, 3);
+    qdummy = x.tail(12);
+
+    // iterate through all constraints
+    for (int i = 0; i < this->size; i++)
+    {
+        int foot_id = impact_foot_ids[i];
+        T foot_id_T = static_cast<T>(foot_id)+1;
+
+        qleg = qdummy.segment(3 * foot_id, 3);
+    
         // compute foot Jacobian
         Jf.setZero();
         vector<T *> arg_J = {pos.data(), eul.data(), qleg.data()};
@@ -133,47 +167,7 @@ void TouchDownConstraint<T>::compute_violation(const State &x)
         this->data[i].hx.segment(3, 3) = Jz.head(3);
         this->data[i].hx.tail(12) = Jz.tail(12);
     }
-    this->update_max_violation();
 }
 
-// template <typename T>
-// void SwingConstraint<T>::compute_violation(const State &x, const Contrl &u, const Output &y, int k)
-// {
-//     /* eul and pos are flipped in the computation of foot position and Jacobian */
-//     VecM<T, 18> q;
-//     q.head(3) = x.segment(3, 3);
-//     q.segment(3, 3) = x.head(3);
-//     q.tail(12) = x.tail(12);
-
-//     unused_ignore(u);
-//     unused_ignore(y);
-
-//     /* compute swing foot positions */
-//     vector<T *> arg_pos = {q.data()};
-//     vector<T *> res_pos = {foot_positions.data()};
-//     casadi_interface(arg_pos, res_pos, foot_positions.size(), compute_foot_positions,
-//                      compute_foot_positions_sparsity_out,
-//                      compute_foot_positions_work);
-
-//     /* compute swing foot jacobians */
-//     vector<T *> arg_J = {q.data()};
-//     vector<T *> res_J = {Js_in_z.data()};
-//     casadi_interface(arg_J, res_J, Js_in_z.size(), compute_foot_jacobians_z,
-//                      compute_foot_jacobians_z_sparsity_out,
-//                      compute_foot_jacobians_z_work);
-
-//     for (int i = 0; i < swing_foot_ids.size(); i++)
-//     {
-//         int foot = swing_foot_ids[i];
-//         this->data[k][i].g = foot_positions[3 * foot + 2] - ground_height;
-//         J_trans = Js_in_z.row(foot).transpose();
-//         this->data[k][i].gx.head(3) = J_trans.segment(3, 3);
-//         this->data[k][i].gx.segment(3, 3) = J_trans.head(3);
-//         this->data[k][i].gx.tail(12) = J_trans.tail(12);
-//     }
-//     this->update_max_violation(k);
-// }
-
 template class GRFConstraint<double>;
-// template class SwingConstraint<double>;
 template class TouchDownConstraint<double>;

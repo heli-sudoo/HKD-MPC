@@ -200,6 +200,7 @@ public:
 		max_violation = std::min(max_violation, max_violation_k);
 	}
 	// call update_max_violation in compute_violation in the derived class
+	virtual void compute_partial(const State&, const Contrl&, const Output&, int k) = 0;
 	virtual void compute_violation(const State&, const Contrl&, const Output&, int k) = 0;
 
 public:
@@ -289,6 +290,7 @@ public:
 			if (fabs(data[i].h) > 0.01) // if too large, increase penalty
 			{
 				params[i].update_penalty(beta);
+				params[i].sigma = std::min(params[i].sigma, 1e5);
 			}else // if not too large, update Lagrange multiplier
 			{
 				params[i].update_Lagrange(data[i].h);
@@ -305,6 +307,7 @@ public:
 	}
 	// call uppdate_max_violation in compute_violation
 	virtual void compute_violation(const State&) = 0;
+	virtual void compute_partial(const State&) = 0;
 };
 
 template<typename T, size_t xs, size_t us, size_t ys>
@@ -352,9 +355,19 @@ public:
 			pathConstraint->compute_violation(x,u,y,k);
 		}
 	}
+	void compute_path_constraints_par(const State& x, const Contrl& u, const Output& y, int k){
+		for (auto pathConstraint : pathConstraints){
+			pathConstraint->compute_partial(x,u,y,k);
+		}
+	}
 	void compute_terminal_constraints(const State& x){
 		for (auto terminalConstraint : terminalConstraints){
 			terminalConstraint->compute_violation(x);
+		}
+	}
+	void compute_terminal_constraints_par(const State& x){
+		for (auto terminalConstraint : terminalConstraints){
+			terminalConstraint->compute_partial(x);
 		}
 	}
 	// May need better implementation for speed up

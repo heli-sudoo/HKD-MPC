@@ -22,7 +22,7 @@ template <typename T>
 void MPCSolver<T>::initialize()
 {
     /* Initialize tunning parameters for DDP solver */
-    ddp_options.update_penalty = 8;
+    ddp_options.update_penalty = 5;
     ddp_options.update_relax = 1;
     ddp_options.update_ReB = 1;
     ddp_options.update_regularization = 4;
@@ -30,14 +30,14 @@ void MPCSolver<T>::initialize()
     ddp_options.max_AL_iter = 15;
     ddp_options.cost_thresh = 1e-02;
     ddp_options.AL_active = 1;
-    ddp_options.ReB_active = 0;
+    ddp_options.ReB_active = 1;
     ddp_options.pconstr_thresh = .003;
     ddp_options.tconstr_thresh = .003;
     ddp_options.MS = true;
     ddp_options.merit_rho = 1e03;
 
     mpc_config.plan_duration = .5;
-    mpc_config.nsteps_between_mpc = 2;
+    mpc_config.nsteps_between_mpc = 1;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
     opt_ref.initialize_referenceData(mpc_config.plan_duration);
@@ -103,7 +103,7 @@ void MPCSolver<T>::update()
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
     // use less iterations when resolving DDP
-    ddp_options.max_AL_iter = 3;
+    ddp_options.max_AL_iter = 2;
     ddp_options.max_DDP_iter = 1;
     mpc_iter++;
 

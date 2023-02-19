@@ -37,9 +37,10 @@ public:
 
     void pop_front();
     void push_back_zero();
+    void push_back_state(const DVec<T>& state_to_add);
     int size(){return Xbar.size();}
 
-    void update_defect();
+    void compute_defect();
     T measure_dynamics_feasibility(int norm_id = 2);
 
 public:
@@ -56,6 +57,7 @@ public:
 
     /* Shared pointers to hold simulated state, defects */
     deque<VecM<T, xs>> Xsim;
+    deque<VecM<T, xs>> Defect_bar;
     deque<VecM<T, xs>> Defect;
 
     /* Shared pointers to hold linearized dynamics */

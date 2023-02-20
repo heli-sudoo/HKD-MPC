@@ -2,4 +2,9 @@
 .vscode
 MPC_Controller/log/**
 MPC_Controller/PolicyRollout/*.csv
+lcm-types/java
+lcm-types/file_list.txt
+lcm-types/cpp/*
+lcm-types/lcmtypes/*
+lcm-types/python/*
 

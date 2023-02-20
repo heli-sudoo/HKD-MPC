@@ -111,14 +111,12 @@ void MultiPhaseDDP<T>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
 
         phases[i]->set_initial_condition(xinit, xsim_init); // Set initial condition of current phase
         phases[i]->nonlinear_rollout(eps, option);             // run hybrid rollout for each phase
-        actual_cost += phases[i]->get_actual_cost();        // update total cost
+        
         // update the maximum constraint violations
         max_pconstr = std::min(max_pconstr, phases[i]->get_max_pconstrs()); // should have non-positive value
         max_tconstr = std::max(max_tconstr, phases[i]->get_max_tconstrs()); // should have non-negative value
     }
-
-    feas = measure_dynamics_feasibility();
-    merit = actual_cost + option.merit_rho * feas;
+    
 }
 
 template <typename T>

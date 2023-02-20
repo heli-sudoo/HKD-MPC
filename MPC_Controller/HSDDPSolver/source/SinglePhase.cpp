@@ -217,6 +217,37 @@ void SinglePhase<T, xs, us, ys>::hybrid_rollout(T eps, HSDDP_OPTION &option, boo
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
+{
+    VecM<T, xs> dxk;
+    VecM<T, xs> xk_next;    
+
+    int k = 0;
+    actual_cost = 0;
+    X->at(0) = x_init;
+    Xsim->at(0) = xsim_init;    
+    for (int k = 0; k < phase_horizon; k++)
+    {
+        dxk = X->at(k) - Xbar->at(k);
+
+        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * dxk;
+
+        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
+
+        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
+
+        X->at(k + 1) = Xsim->at(k + 1) - (1 - eps) * Defect_bar->at(k + 1);
+
+    }
+
+    /* compute terminal constraint */
+    constraintContainer.compute_terminal_constraints(X->at(k));
+
+    /* compute defects */    
+    compute_defect();
+}
+
+template <typename T, size_t xs, size_t us, size_t ys>
 void SinglePhase<T, xs, us, ys>::compute_cost(const HSDDP_OPTION& option)
 {    
     vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
@@ -253,66 +284,6 @@ void SinglePhase<T, xs, us, ys>::compute_cost(const HSDDP_OPTION& option)
         update_terminal_cost_with_tconstr(tconstrsData, al_params);
     }
     actual_cost += tcostData->Phi;   
-}
-
-template <typename T, size_t xs, size_t us, size_t ys>
-void SinglePhase<T, xs, us, ys>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
-{
-    VecM<T, xs> dxk;
-    VecM<T, xs> xk_next;
-    vector<IneqConstrData<T, xs, us, ys>> pconstrsData;
-    vector<TConstrData<T, xs>> tconstrsData;
-    vector<REB_Param_Struct<T>> reb_params;
-    vector<AL_Param_Struct<T>> al_params;
-
-    int k = 0;
-    actual_cost = 0;
-    X->at(0) = x_init;
-    Xsim->at(0) = xsim_init;    
-    for (int k = 0; k < phase_horizon; k++)
-    {
-        dxk = X->at(k) - Xbar->at(k);
-
-        U->at(k) = Ubar->at(k) + eps * dU->at(k) + K->at(k) * dxk;
-
-        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-
-        dynamics(Xsim->at(k + 1), Y->at(k), X->at(k), U->at(k));
-
-        X->at(k + 1) = Xsim->at(k + 1) - (1 - eps) * Defect_bar->at(k + 1);
-
-        /* compute running cost*/
-        costContainer.running_cost(rcostData->at(k), X->at(k), U->at(k), Y->at(k), dt, k);
-
-        /* compute path constraints */
-        constraintContainer.compute_path_constraints(X->at(k), U->at(k), Y->at(k), k);
-
-        /* update running cost with path constraints using ReB method */
-        if (option.ReB_active)
-        {
-            constraintContainer.get_path_constraints(pconstrsData, k);
-            constraintContainer.get_reb_params(reb_params, k);
-            update_running_cost_with_pconstr(rcostData->at(k), pconstrsData, reb_params);
-        }
-
-        actual_cost += rcostData->at(k).l;
-    }
-
-    /* compute terminal cost and its partials */
-    costContainer.terminal_cost(*tcostData, X->at(k), k);
-
-    /* compute terminal constraint */
-    constraintContainer.compute_terminal_constraints(X->at(k));
-
-    /* update terminal cost with terminal constraint using AL */
-    if (option.AL_active)
-    {
-        constraintContainer.get_terminal_constraints(tconstrsData);
-        constraintContainer.get_al_params(al_params);
-        update_terminal_cost_with_tconstr(tconstrsData, al_params);
-    }
-    actual_cost += tcostData->Phi;
-    compute_defect();
 }
 
 template <typename T, size_t xs, size_t us, size_t ys>

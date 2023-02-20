@@ -33,13 +33,15 @@ void MPCSolver<T>::initialize()
     ddp_options.ReB_active = 1;
     ddp_options.pconstr_thresh = .003;
     ddp_options.tconstr_thresh = .003;
-    ddp_options.MS = true;
+    ddp_options.MS = false;
     ddp_options.merit_rho = 1e03;
 
     mpc_config.plan_duration = .5;
     mpc_config.nsteps_between_mpc = 1;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
+
+    opt_problem.clear_problem_data();
     opt_ref.initialize_referenceData(mpc_config.plan_duration);
 
     opt_problem.setup(&opt_problem_data, mpc_config);
@@ -166,6 +168,12 @@ void MPCSolver<T>::mpcdata_lcm_handler(const lcm::ReceiveBuffer *rbuf, const std
     printf("Received resolving request\n");
     printf(RESET);
 
+    if (msg->reset_mpc)
+    {
+        initialize();
+        return;
+    }
+    
     std::memcpy(&hkd_data, msg, sizeof(hkd_data));
     mpc_time_prev = mpc_time;
     mpc_time = hkd_data.mpctime;

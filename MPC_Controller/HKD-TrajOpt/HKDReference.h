@@ -27,9 +27,10 @@ struct HKDReferenceData
 
     void clear()
     {
-        contactSeq.clear();
+        contactSeq.clear();        
         startTimes.clear();
         endTimes.clear();
+        horizons.clear();
         Xr.clear();
         Ur.clear();
         Yr.clear();
@@ -87,6 +88,8 @@ public:
         }
 
     HKDReferenceData<T> * get_referenceData_ptr() {return &data;}
+
+    void clear() {data.clear(); last_phase_idx = 0;}
 
     void initialize_referenceData(T duration){
         // induce the number of phases and the horizon of each phase

@@ -92,6 +92,12 @@ public:
 
     void add_tconstr_one_phase(shared_ptr<SinglePhase<T,24,24,0>> phase, int idx);
 
+    void clear_problem_data(){
+        pdata->phase_ptrs.clear();
+        pdata->trajectory_ptrs.clear();
+        pdata->reference_ptr->clear();
+    }
+
     void print();
 
     void lcm_publish();

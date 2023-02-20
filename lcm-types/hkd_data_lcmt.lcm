@@ -1,4 +1,5 @@
 struct hkd_data_lcmt {
+    boolean reset_mpc;
     double mpctime;
     int32_t contact[4];
     float p[3];

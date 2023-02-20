@@ -46,10 +46,7 @@ public:
             return;
         }       
 
-        mpc_lcm.subscribe("mpc_data", &MPCSolver::mpcdata_lcm_handler, this);
-        
-        first_yaw_flip = true;
-        yaw_flip_times = 0;
+        mpc_lcm.subscribe("mpc_data", &MPCSolver::mpcdata_lcm_handler, this);       
         solve_time = 0;
     }
     void mpcdata_lcm_handler(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
@@ -77,8 +74,6 @@ public:
     T mpc_time;
     T mpc_time_prev;
     int mpc_iter;
-    bool first_yaw_flip;
-    int yaw_flip_times;
     
     DVec<T> xinit;
     VecM<T, 12> body, qdummy, qJ;

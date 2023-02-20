@@ -44,9 +44,9 @@ public:
     const static size_t ys = 0;
 
 private:
-    HKDProblemData<T>* pdata;
-    HKDReference<T>* reference;
-    HKDReferenceData<T>* ref_data;
+    HKDProblemData<T>* pdata = nullptr;
+    HKDReference<T>* reference = nullptr;
+    HKDReferenceData<T>* ref_data = nullptr;
 
     HKDModel<T> hkdModel;
     HKDReset<T> hkdReset;
@@ -93,9 +93,13 @@ public:
     void add_tconstr_one_phase(shared_ptr<SinglePhase<T,24,24,0>> phase, int idx);
 
     void clear_problem_data(){
-        pdata->phase_ptrs.clear();
-        pdata->trajectory_ptrs.clear();
-        pdata->reference_ptr->clear();
+        if (pdata != nullptr)
+        {
+            pdata->phase_ptrs.clear();
+            pdata->trajectory_ptrs.clear();
+            pdata->reference_ptr->clear();
+        }
+            
     }
 
     void print();

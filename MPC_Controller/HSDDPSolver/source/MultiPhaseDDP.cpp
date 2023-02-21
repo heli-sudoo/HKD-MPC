@@ -58,11 +58,7 @@ void MultiPhaseDDP<T>::hybrid_rollout(T eps, HSDDP_OPTION &option)
     DVec<T> xsim_end;
     bool is_last_phase = false;
 
-    run_before_forward_sweep(); // currently not used
-    if (n_phases >= 1)
-    {
-        phases[0]->set_nominal_initial_condition(x0);
-    }
+    run_before_forward_sweep(); // currently not used   
 
     for (int i = 0; i < n_phases; i++)
     {
@@ -93,12 +89,7 @@ void MultiPhaseDDP<T>::nonlinear_rollout(T eps, HSDDP_OPTION &option)
     DVec<T> xsim_init = x0;
     DVec<T> xend;
     DVec<T> xsim_end;
-
-    if (n_phases >= 1)
-    {
-        phases[0]->set_nominal_initial_condition(x0);
-    }
-
+   
     for (int i = 0; i < n_phases; i++)
     {
         if (i > 0)
@@ -271,8 +262,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
     auto stop = high_resolution_clock::now();
     auto duration = duration_ms(stop - start);
 #endif        
-
-    update_nominal_trajectory();      
+    
     hybrid_rollout(0, option); 
     update_nominal_trajectory();
 

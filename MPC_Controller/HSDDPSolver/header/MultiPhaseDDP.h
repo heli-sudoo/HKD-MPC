@@ -67,19 +67,19 @@ public:
 
     T get_actual_cost() {return actual_cost;}
 
-    void empty_solution(){
-        for (auto phase:phases)
-        {
-            phase->empty_control();
-        }        
-        phases.clear();
-        actual_cost = 0;
-        // exp_cost_change = 0;
-        max_tconstr = 0;
-        max_pconstr = 0;
-        max_tconstr_prev = 0;
-        max_pconstr_prev = 0;
-    }
+    // void empty_solution(){
+    //     for (auto phase:phases)
+    //     {
+    //         phase->empty_control();
+    //     }        
+    //     phases.clear();
+    //     actual_cost = 0;
+    //     // exp_cost_change = 0;
+    //     max_tconstr = 0;
+    //     max_pconstr = 0;
+    //     max_tconstr_prev = 0;
+    //     max_pconstr_prev = 0;
+    // }
 
     T measure_dynamics_feasibility(int norm_id=2);    
 

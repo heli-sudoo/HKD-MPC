@@ -44,6 +44,7 @@ void HKDProblem<T>::initialization()
 
         // Initialize state trajectory using the state reference
         std::copy(ref_data->Xr[i].begin(), ref_data->Xr[i].end(), traj->X.begin());
+        std::copy(ref_data->Xr[i].begin(), ref_data->Xr[i].end(), traj->Xbar.begin());
         
         // Add trajectory to the corresponding phase
         phase->set_trajectory(traj);      
@@ -103,7 +104,8 @@ void HKDProblem<T>::update()
         if (trajectories.size() < ref_data->n_phases)
         {
             shared_ptr<Trajectory<T, 24, 24, 0>> traj_to_add;
-            traj_to_add = make_shared<Trajectory<T, 24, 24, 0>>(timeStep, horizons.back());            
+            traj_to_add = make_shared<Trajectory<T, 24, 24, 0>>(timeStep, horizons.back());       
+            std::copy(ref_data->Xr.back().begin(), ref_data->Xr.back().end(), traj_to_add->X.begin());
 
             shared_ptr<SinglePhase<T, 24, 24, 0>> phase_to_add;
             phase_to_add = make_shared<SinglePhase<T, 24, 24, 0>>();             

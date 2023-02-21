@@ -102,10 +102,10 @@ void HKDProblem<T>::update()
         }
         // If trajectories is shorter than expected # phases, grow trajectories and phases by one
         if (trajectories.size() < ref_data->n_phases)
-        {
+        {            
+
             shared_ptr<Trajectory<T, 24, 24, 0>> traj_to_add;
-            traj_to_add = make_shared<Trajectory<T, 24, 24, 0>>(timeStep, horizons.back());       
-            std::copy(ref_data->Xr.back().begin(), ref_data->Xr.back().end(), traj_to_add->X.begin());
+            traj_to_add = make_shared<Trajectory<T, 24, 24, 0>>(timeStep, horizons.back());                
 
             shared_ptr<SinglePhase<T, 24, 24, 0>> phase_to_add;
             phase_to_add = make_shared<SinglePhase<T, 24, 24, 0>>();             
@@ -140,16 +140,15 @@ void HKDProblem<T>::update()
         
         if (i==n_phases-1)
         {
-            if (ref_data->horizons[i]>1)
+            if (ref_data->horizons[i]>2)
             {
-                pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]);
+                pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i] + 1);
             }            
             
         }else
         {
             pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]+1);
-        }        
-        
+        }                
     }
        
 }

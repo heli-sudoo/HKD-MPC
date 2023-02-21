@@ -33,11 +33,11 @@ void MPCSolver<T>::initialize()
     ddp_options.ReB_active = 1;
     ddp_options.pconstr_thresh = .003;
     ddp_options.tconstr_thresh = .003;
-    ddp_options.MS = false;
-    ddp_options.merit_rho = 1e03;
+    ddp_options.MS = true;
+    ddp_options.merit_rho = 1e02;
 
     mpc_config.plan_duration = .5;
-    mpc_config.nsteps_between_mpc = 1;
+    mpc_config.nsteps_between_mpc = 2;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
 
@@ -95,7 +95,7 @@ void MPCSolver<T>::initialize()
 
     update_foot_placement();
     publish_mpc_cmd();
-    publish_debugfoot();
+    // publish_debugfoot();
     // opt_problem.lcm_publish();
 }
 
@@ -105,7 +105,7 @@ void MPCSolver<T>::update()
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
     // use less iterations when resolving DDP
-    ddp_options.max_AL_iter = 2;
+    ddp_options.max_AL_iter = 3;
     ddp_options.max_DDP_iter = 1;
     mpc_iter++;
 
@@ -153,7 +153,7 @@ void MPCSolver<T>::update()
 
     update_foot_placement();
     publish_mpc_cmd();
-    publish_debugfoot();
+    // publish_debugfoot();
     // opt_problem.lcm_publish();
     mpc_mutex.unlock();
 }
@@ -162,15 +162,15 @@ template <typename T>
 void MPCSolver<T>::mpcdata_lcm_handler(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                                        const hkd_data_lcmt *msg)
 {
-    mpc_mutex.lock();
-
+    mpc_mutex.lock();    
     printf(GRN);
     printf("Received resolving request\n");
     printf(RESET);
 
     if (msg->reset_mpc)
     {
-        initialize();
+        mpc_mutex.unlock();
+        initialize();        
         return;
     }
     

@@ -20,21 +20,9 @@ static int fit_iter = 0;
 
 template <typename T>
 void MPCSolver<T>::initialize()
-{
-    /* Initialize tunning parameters for DDP solver */
-    ddp_options.update_penalty = 5;
-    ddp_options.update_relax = 1;
-    ddp_options.update_ReB = 1;
-    ddp_options.update_regularization = 4;
+{   
     ddp_options.max_DDP_iter = 10;
     ddp_options.max_AL_iter = 15;
-    ddp_options.cost_thresh = 1e-02;
-    ddp_options.AL_active = 1;
-    ddp_options.ReB_active = 1;
-    ddp_options.pconstr_thresh = .003;
-    ddp_options.tconstr_thresh = .003;
-    ddp_options.MS = true;
-    ddp_options.merit_rho = 1e02;
 
     mpc_config.plan_duration = .5;
     mpc_config.nsteps_between_mpc = 2;
@@ -47,6 +35,9 @@ void MPCSolver<T>::initialize()
     opt_problem.setup(&opt_problem_data, mpc_config);
     opt_problem.initialization();
     opt_problem.print();
+
+    mpc_time = 0;
+    mpc_time_prev = 0;
 
     if (!almostEqual_number(dt_mpc, opt_problem_data.ref_data_ptr->dt))
     {
@@ -105,8 +96,8 @@ void MPCSolver<T>::update()
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
     // use less iterations when resolving DDP
-    ddp_options.max_AL_iter = 3;
-    ddp_options.max_DDP_iter = 1;
+    ddp_options.max_AL_iter = 2;
+    ddp_options.max_DDP_iter = 2;
     mpc_iter++;
 
     printf("************************************* \n");
@@ -169,7 +160,8 @@ void MPCSolver<T>::mpcdata_lcm_handler(const lcm::ReceiveBuffer *rbuf, const std
 
     if (msg->reset_mpc)
     {
-        mpc_mutex.unlock();
+        ddp_options.MS = msg->MS;
+        mpc_mutex.unlock();        
         initialize();        
         return;
     }

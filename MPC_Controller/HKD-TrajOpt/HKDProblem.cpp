@@ -25,7 +25,7 @@ void HKDProblem<T>::initialization()
         return;
     }
 
-    grf_reb_param.delta = 1;
+    grf_reb_param.delta = .1;
     grf_reb_param.delta_min = 0.001;
     grf_reb_param.eps = .01;
     swing_reb_param.delta = 2;
@@ -148,9 +148,18 @@ void HKDProblem<T>::update()
         }else
         {
             pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]+1);
-        }                
+        }       
+
+        for (int k = 0; k < ref_data->horizons[i]; i++)
+        {
+            pdata->trajectory_ptrs[i]->Ubar[k].setZero();
+            pdata->trajectory_ptrs[i]->K[k].setZero();       
+        }
+                 
     }
-       
+
+    // pdata->trajectory_ptrs.front()->Ubar[0].setZero();
+    // pdata->trajectory_ptrs.front()->K[0].setZero();       
 }
 
 template<typename T>

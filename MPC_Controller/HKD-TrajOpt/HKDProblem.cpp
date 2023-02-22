@@ -148,18 +148,12 @@ void HKDProblem<T>::update()
         }else
         {
             pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]+1);
-        }       
-
-        // for (int k = 0; k < ref_data->horizons[i]; k++)
-        // {
-        //     pdata->trajectory_ptrs[i]->Ubar[k].setZero();
-        //     pdata->trajectory_ptrs[i]->K[k].setZero();       
-        // }
+        }               
                  
     }
 
-    // pdata->trajectory_ptrs.front()->Ubar[0].setZero();
-    // pdata->trajectory_ptrs.front()->K[0].setZero();       
+    pdata->trajectory_ptrs.front()->Ubar[0].setZero();
+    pdata->trajectory_ptrs.front()->K[0].setZero();       
 }
 
 template<typename T>

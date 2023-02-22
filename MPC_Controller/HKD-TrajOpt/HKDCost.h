@@ -18,7 +18,7 @@ public:
         QqJ.setZero();
                 
         Qeul.diagonal() << 1, 4, 5;
-        Qpos.diagonal() << .2, 1, 30;
+        Qpos.diagonal() << .2, .2, 30;
         Qw.diagonal() << .2, .2, .2;
         Qv.diagonal() << 4, 1, .5;
         QqJ.diagonal() << VecM<T, 3>::Constant(.2 * (1 - contact[0])),
@@ -34,7 +34,7 @@ public:
         /* Terminal state weighting matrix */
         VecM<T, 24> scale;
         scale << 1, 1, 2, 
-                  .2, 1, 20, 
+                  .2, .2, 20, 
                   .3, .3, .3, 
                   1, 3, 1, 
                   .01 * VecM<T, 12>::Ones();

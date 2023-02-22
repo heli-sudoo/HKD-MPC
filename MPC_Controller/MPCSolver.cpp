@@ -96,8 +96,8 @@ void MPCSolver<T>::update()
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
     // use less iterations when resolving DDP
-    ddp_options.max_AL_iter = 2;
-    ddp_options.max_DDP_iter = 2;
+    ddp_options.max_AL_iter = 3;
+    ddp_options.max_DDP_iter = 1;
     mpc_iter++;
 
     printf("************************************* \n");

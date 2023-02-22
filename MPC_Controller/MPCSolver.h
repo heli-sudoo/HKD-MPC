@@ -41,15 +41,15 @@ public:
         // Default DDP options
         ddp_options.update_penalty = 5;
         ddp_options.update_relax = 1;
-        ddp_options.update_ReB = 2;
+        ddp_options.update_ReB = 1;
         ddp_options.update_regularization = 4;      
         ddp_options.cost_thresh = 1e-02;
         ddp_options.AL_active = 1;
-        ddp_options.ReB_active = 1;
+        ddp_options.ReB_active = 0;
         ddp_options.pconstr_thresh = .003;
         ddp_options.tconstr_thresh = .003;
         ddp_options.MS = true;
-        ddp_options.merit_rho = 1e03;
+        ddp_options.merit_rho = 5*1e02;
 
 
         // Check LCM initialization

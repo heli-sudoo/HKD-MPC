@@ -79,7 +79,7 @@ void HKDProblem<T>::update()
 {
     // use smaller relaxation parameter
     grf_reb_param.delta = .1;
-    grf_reb_param.eps = .1;   
+    grf_reb_param.eps = 0.01;   
     
     for (int j = 0; j < nsteps_between_mpc; j++)
     {
@@ -150,11 +150,11 @@ void HKDProblem<T>::update()
             pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]+1);
         }       
 
-        for (int k = 0; k < ref_data->horizons[i]; i++)
-        {
-            pdata->trajectory_ptrs[i]->Ubar[k].setZero();
-            pdata->trajectory_ptrs[i]->K[k].setZero();       
-        }
+        // for (int k = 0; k < ref_data->horizons[i]; k++)
+        // {
+        //     pdata->trajectory_ptrs[i]->Ubar[k].setZero();
+        //     pdata->trajectory_ptrs[i]->K[k].setZero();       
+        // }
                  
     }
 

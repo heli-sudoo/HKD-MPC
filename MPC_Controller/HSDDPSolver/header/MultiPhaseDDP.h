@@ -65,23 +65,11 @@ public:
 
     void update_REB_params(HSDDP_OPTION& option);    
 
-    T get_actual_cost() {return actual_cost;}
-
-    // void empty_solution(){
-    //     for (auto phase:phases)
-    //     {
-    //         phase->empty_control();
-    //     }        
-    //     phases.clear();
-    //     actual_cost = 0;
-    //     // exp_cost_change = 0;
-    //     max_tconstr = 0;
-    //     max_pconstr = 0;
-    //     max_tconstr_prev = 0;
-    //     max_pconstr_prev = 0;
-    // }
+    T get_actual_cost() {return actual_cost;}   
 
     T measure_dynamics_feasibility(int norm_id=2);    
+
+    void publish_solver_info();
 
 private:
     int n_phases;
@@ -100,6 +88,7 @@ private:
 
     DVec<T> x0;
     DVec<T> dx0;
+
 private:
     function<void(DVec<T>)> dynamics_init_callback;
 

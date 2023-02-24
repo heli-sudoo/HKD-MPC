@@ -69,7 +69,8 @@ public:
 
     T measure_dynamics_feasibility(int norm_id=2);    
 
-    void publish_solver_info();
+    void get_solver_info(std::vector<float>&, std::vector<float>&,
+                         std::vector<float>&, std::vector<float>&);
 
 private:
     int n_phases;
@@ -88,6 +89,12 @@ private:
 
     DVec<T> x0;
     DVec<T> dx0;
+
+    // buffered solver information
+    std::vector<float> cost_buffer;    
+    std::vector<float> dyn_feas_buffer;
+    std::vector<float> eqn_feas_buffer;
+    std::vector<float> ineq_feas_buffer; 
 
 private:
     function<void(DVec<T>)> dynamics_init_callback;

@@ -276,14 +276,6 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
         printf("outer loop iteration %d \n", iter_ou);
 #endif
 
-        option.ReB_active = ReB_active;
-        // if (max_tconstr > 0.1 || 1 == iter_ou)
-        if (max_tconstr > 0.1)
-        {
-            /* If terminal constraint violation is too large, turn path constraint off */
-            option.ReB_active = 0;
-        }
-
 #ifdef TIME_BENCHMARK
         start = high_resolution_clock::now();
 #endif  

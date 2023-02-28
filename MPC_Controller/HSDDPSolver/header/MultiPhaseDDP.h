@@ -5,7 +5,10 @@
 #include <deque>
 #include <memory> // smart pointer (since C++ 11)
 #include <functional>
+#include <lcm/lcm-cpp.hpp>
 #include "SinglePhase.h"
+#include "solver_intermtraj_lcmt.hpp"
+#include "utilities.h"
 
 using std::vector;
 using std::deque;
@@ -19,7 +22,7 @@ private:
     deque<shared_ptr<SinglePhaseBase<T>>> phases;
 
 public:
-    MultiPhaseDDP() {} // default constructor
+    MultiPhaseDDP(): traj_lcm(getLcmUrl(255)) {} // default constructor
 
     void set_multiPhaseProblem(deque<shared_ptr<SinglePhaseBase<T>>> phases_in){
         phases = phases_in;
@@ -72,6 +75,20 @@ public:
     void get_solver_info(std::vector<float>&, std::vector<float>&,
                          std::vector<float>&, std::vector<float>&);
 
+    void publish_trajectory(){
+        traj_to_publish.x_tau.clear();
+        traj_to_publish.u_tau.clear();
+        for (auto& phase: phases)
+        {
+            phase->get_trajectory(traj_to_publish.x_tau, traj_to_publish.u_tau);
+        }
+        traj_to_publish.tau_sz = traj_to_publish.x_tau.size();
+        traj_to_publish.x_sz = traj_to_publish.x_tau[0].size();
+        traj_to_publish.u_sz = traj_to_publish.u_tau[0].size();
+        traj_lcm.publish("intermediate_ddp_traj", &traj_to_publish);
+        printf("publishing an intermediate trajectory \n");
+    }
+
 private:
     int n_phases;
 
@@ -95,6 +112,10 @@ private:
     std::vector<float> dyn_feas_buffer;
     std::vector<float> eqn_feas_buffer;
     std::vector<float> ineq_feas_buffer; 
+
+    // helpful variables
+    lcm::LCM traj_lcm;
+    solver_intermtraj_lcmt traj_to_publish;
 
 private:
     function<void(DVec<T>)> dynamics_init_callback;

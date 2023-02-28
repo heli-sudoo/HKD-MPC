@@ -84,6 +84,8 @@ public:
 
     virtual void compute_cost(const HSDDP_OPTION& option) = 0;
 
+    virtual void get_trajectory(std::vector< std::vector<float>> & x_tau, std::vector< std::vector<float>> & u_tau) {};
+
 };
 
 #endif //SINGLEPHASE_BASE_H

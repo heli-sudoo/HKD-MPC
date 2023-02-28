@@ -162,6 +162,8 @@ public:
         std::iota(SS_set.begin(), SS_set.end(), 0);
         }
 
+    void get_trajectory(std::vector< std::vector<float>> & x_tau, 
+                        std::vector< std::vector<float>> & u_tau) override ; 
 private:
     void update_trajectory_ptrs();
     
@@ -187,7 +189,9 @@ private:
     void update_terminal_cost_with_tconstr(vector<TConstrData<T, xs>>& tconstrsData,
                                            vector<AL_Param_Struct<T>>& al_params);
     void update_terminal_cost_par_with_tconstr(vector<TConstrData<T, xs>>& tconstrsData,
-                                           vector<AL_Param_Struct<T>>& al_params);                                                                                      
+                                           vector<AL_Param_Struct<T>>& al_params);          
+
+                                                                                                                         
 
 private:
     shared_ptr<Trajectory<T,xs,us,ys>> traj;

@@ -18,12 +18,14 @@
 #include "utilities.h"
 #include "Imitation_Reference.h"
 #include "HKDReference.h"
+#include "solver_info_lcmt.hpp"
 
 template<typename T>
 class MPCSolver
 {
 public:
-    MPCSolver() : mpc_lcm(getLcmUrl(255))
+    MPCSolver() : mpc_lcm(getLcmUrl(255)),
+                  solver_info_lcm(getLcmUrl(255))
     {
         // Setup reference
         string imitation_path = "../PolicyRollout/";
@@ -45,11 +47,12 @@ public:
         ddp_options.update_regularization = 4;      
         ddp_options.cost_thresh = 1e-02;
         ddp_options.AL_active = 1;
-        ddp_options.ReB_active = 0;
+        ddp_options.ReB_active = 1;
         ddp_options.pconstr_thresh = .003;
         ddp_options.tconstr_thresh = .003;
         ddp_options.MS = true;
-        ddp_options.merit_rho = 5*1e02;
+        ddp_options.merit_rho = 1e03;
+        // ddp_options.gamma = 0;
 
 
         // Check LCM initialization
@@ -66,6 +69,7 @@ public:
     void mpcdata_lcm_handler(const lcm::ReceiveBuffer *rbuf, const std::string &chan,
                              const hkd_data_lcmt *msg);
     void publish_mpc_cmd();
+    void publish_solver_info();
     void publish_debugfoot();
     void initialize();
     void update();
@@ -98,6 +102,8 @@ public:
     hkd_command_lcmt hkd_cmds;
     opt_sol_lcmt debug_foot_data;
     lcm::LCM mpc_lcm;
+    lcm::LCM solver_info_lcm;
+    solver_info_lcmt solver_info;
 
     // foot placement
     Vec3<float> pf[4];

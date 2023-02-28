@@ -32,7 +32,7 @@ void HKDProblem<T>::initialization()
     swing_reb_param.delta_min = 0.01;
     swing_reb_param.eps = 0.02;
     td_al_param.lambda = 0;
-    td_al_param.sigma = 100;
+    td_al_param.sigma = 50;
 
     for (int i = 0; i < n_phases; i++)
     {
@@ -78,8 +78,8 @@ template <typename T>
 void HKDProblem<T>::update()
 {
     // use smaller relaxation parameter
-    grf_reb_param.delta = .1;
-    grf_reb_param.eps = 0.01;   
+    // grf_reb_param.delta = .1;
+    // grf_reb_param.eps = 0.01;   
     
     for (int j = 0; j < nsteps_between_mpc; j++)
     {
@@ -142,7 +142,7 @@ void HKDProblem<T>::update()
         {
             if (ref_data->horizons[i]>2)
             {
-                pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i] + 1);
+                pdata->phase_ptrs[i]->update_SS_config(ref_data->horizons[i]+1);
             }            
             
         }else
@@ -153,7 +153,7 @@ void HKDProblem<T>::update()
     }
 
     pdata->trajectory_ptrs.front()->Ubar[0].setZero();
-    pdata->trajectory_ptrs.front()->K[0].setZero();       
+    // pdata->trajectory_ptrs.front()->K[0].setZero();       
 }
 
 template<typename T>

@@ -10,6 +10,8 @@
 #include "HKDLog.h"
 
 #define TIME_BENCHMARK 
+#define PUBLISH_SOLVER_INFO
+
 #ifdef TIME_BENCHMARK
 #include <chrono>
 using namespace std::chrono;
@@ -22,7 +24,7 @@ template <typename T>
 void MPCSolver<T>::initialize()
 {   
     ddp_options.max_DDP_iter = 10;
-    ddp_options.max_AL_iter = 15;
+    ddp_options.max_AL_iter = 5;
 
     mpc_config.plan_duration = .5;
     mpc_config.nsteps_between_mpc = 2;
@@ -34,7 +36,7 @@ void MPCSolver<T>::initialize()
 
     opt_problem.setup(&opt_problem_data, mpc_config);
     opt_problem.initialization();
-    opt_problem.print();
+    // opt_problem.print();
 
     mpc_time = 0;
     mpc_time_prev = 0;
@@ -81,13 +83,19 @@ void MPCSolver<T>::initialize()
     auto duration = duration_ms(stop - start);
     solve_time = duration.count();
 #endif
+#ifdef PUBLISH_SOLVER_INFO
+    solver.get_solver_info( solver_info.cost, 
+                            solver_info.dyn_feas,
+                            solver_info.eqn_feas, 
+                            solver_info.ineq_feas);    
+    publish_solver_info();                            
+#endif
     log_trajectory_sequence(opt_problem_data.trajectory_ptrs);
     mpc_iter = 0;
 
     update_foot_placement();
     publish_mpc_cmd();
     // publish_debugfoot();
-    // opt_problem.lcm_publish();
 }
 
 template <typename T>
@@ -96,7 +104,7 @@ void MPCSolver<T>::update()
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
     // use less iterations when resolving DDP
-    ddp_options.max_AL_iter = 3;
+    ddp_options.max_AL_iter = 2;
     ddp_options.max_DDP_iter = 1;
     mpc_iter++;
 
@@ -140,6 +148,14 @@ void MPCSolver<T>::update()
     auto duration = duration_ms(stop - start);
     solve_time = duration.count();
     printf("solve time = %f \n", solve_time);
+#endif
+
+#ifdef PUBLISH_SOLVER_INFO
+    solver.get_solver_info( solver_info.cost, 
+                            solver_info.dyn_feas,
+                            solver_info.eqn_feas, 
+                            solver_info.ineq_feas);    
+    publish_solver_info();                            
 #endif
 
     update_foot_placement();
@@ -212,8 +228,8 @@ void MPCSolver<T>::update_foot_placement()
                 }
             }
         }
-        // Break if not found after three phases
-        if (i >= 3)
+        // Break if not found after four phases
+        if (i >= 4)
         {
             break;
         }
@@ -301,6 +317,13 @@ void MPCSolver<T>::publish_debugfoot()
         debug_foot_data.N += horizon;
     }
     mpc_lcm.publish("debug_foot", &debug_foot_data);
+}
+
+template <typename T>
+void MPCSolver<T>::publish_solver_info()
+{
+    solver_info.n_iter = solver_info.cost.size();
+    solver_info_lcm.publish("solver_info", &solver_info);
 }
 
 template class MPCSolver<double>;

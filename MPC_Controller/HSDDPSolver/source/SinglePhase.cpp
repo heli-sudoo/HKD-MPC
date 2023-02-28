@@ -634,4 +634,24 @@ void SinglePhase<T, xs, us, ys>::pop_front()
     phase_horizon = traj->horizon;
 }
 
+template <typename T, size_t xs, size_t us, size_t ys>
+void SinglePhase<T, xs, us, ys>::get_trajectory(std::vector< std::vector<float>> & x_tau, 
+                                                std::vector< std::vector<float>> & u_tau)
+{
+    std::vector<float> xk;
+    std::vector<float> uk;
+    for (int k = 0; k < phase_horizon; k++)
+    {
+        xk.clear();
+        uk.clear();
+       for (int i = 0; i < xs; i++)
+       {
+           xk.push_back(X->at(k)[i]);
+           uk.push_back(U->at(k)[i]);
+       }
+       x_tau.push_back(xk);
+       u_tau.push_back(uk);
+    }    
+}                    
+
 template class SinglePhase<double, 24, 24, 0>;

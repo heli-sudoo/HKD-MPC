@@ -3,7 +3,7 @@
 #include "HSDDP_CompoundTypes.h"
 #include "cTypes.h"
 
-#define DEBUG
+// #define DEBUG
 
 #ifdef TIME_BENCHMARK
 #include <chrono>
@@ -250,7 +250,6 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 
     T cost_prev(0), merit_prev(0);
     bool success = false; // currently defined only for backward sweep
-    bool ReB_active = option.ReB_active;
 
     /* clear all buffer */    
     cost_buffer.clear();
@@ -269,8 +268,12 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 
     hybrid_rollout(0, option);
     update_nominal_trajectory();
+    compute_cost(option);
+    feas = measure_dynamics_feasibility();
 
-    /* buffer initial information */    
+    publish_trajectory();
+
+    /* buffer the initial information */    
     cost_buffer.push_back(actual_cost);
     dyn_feas_buffer.push_back(feas);
     eqn_feas_buffer.push_back(max_tconstr);

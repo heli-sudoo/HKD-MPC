@@ -9,8 +9,8 @@
 #include "MPCSolver.h"
 #include "HKDLog.h"
 
-#define TIME_BENCHMARK 
-#define PUBLISH_SOLVER_INFO
+// #define TIME_BENCHMARK 
+// #define PUBLISH_SOLVER_INFO
 
 #ifdef TIME_BENCHMARK
 #include <chrono>
@@ -27,7 +27,7 @@ void MPCSolver<T>::initialize()
     ddp_options.max_AL_iter = 5;
 
     mpc_config.plan_duration = .5;
-    mpc_config.nsteps_between_mpc = 2;
+    mpc_config.nsteps_between_mpc = 1;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
 
@@ -104,7 +104,7 @@ void MPCSolver<T>::update()
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
     // use less iterations when resolving DDP
-    ddp_options.max_AL_iter = 2;
+    ddp_options.max_AL_iter = 3;
     ddp_options.max_DDP_iter = 1;
     mpc_iter++;
 

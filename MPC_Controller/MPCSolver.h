@@ -50,8 +50,8 @@ public:
         ddp_options.ReB_active = 1;
         ddp_options.pconstr_thresh = .003;
         ddp_options.tconstr_thresh = .003;
-        ddp_options.MS = true;
-        ddp_options.merit_rho = 1e03;
+        ddp_options.MS = false;
+        ddp_options.merit_rho = 1e04;
         // ddp_options.gamma = 0;
 
 

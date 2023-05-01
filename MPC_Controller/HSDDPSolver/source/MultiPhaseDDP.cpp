@@ -1,9 +1,9 @@
 #include "MultiPhaseDDP.h"
 #include <algorithm>
 #include "HSDDP_CompoundTypes.h"
-#include "cTypes.h"
+#include <iomanip>      // std::setprecision
 
-// #define DEBUG
+#define DEBUG
 
 #ifdef TIME_BENCHMARK
 #include <chrono>
@@ -24,9 +24,12 @@ void MultiPhaseDDP<T>::linear_rollout(T eps, HSDDP_OPTION &option)
     DMat<T> Px; // resetmap partial
     dx0.setZero();
     dx_init = dx0;
+    dV_1 = 0;
+    dV_2 = 0;
 
     for (int i = 0; i < n_phases; i++)
     {
+        T dV_1_i(0), dV_2_i(0);
         if (i > 0)
         {
             phases[i - 1]->get_terminal_state_dx(dx_end);
@@ -38,6 +41,11 @@ void MultiPhaseDDP<T>::linear_rollout(T eps, HSDDP_OPTION &option)
         phases[i]->set_initial_condition_dx(dx_init);
 
         phases[i]->linear_rollout(eps, option);
+
+        phases[i]->get_exp_cost_change(dV_1_i, dV_2_i);
+
+        dV_1 += dV_1_i;
+        dV_2 += dV_2_i;
     }
 }
 
@@ -209,10 +217,11 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
     DMat<T> Hprime;
     DVec<T> xend;
     DMat<T> Px;
-    size_t xs(0), xs_next(0);
-    // T dV_1_temp(0), dV_2_temp(0);
-    // dV_1 = 0;
-    // dV_2 = 0;
+    size_t xs(0), xs_next(0);    
+    dV_1 = 0;
+    dV_2 = 0;
+    T dV_1_i(0), dV_2_i(0);
+
     for (int i = n_phases - 1; i >= 0; i--)
     {
         xs = phases[i]->get_state_dim();
@@ -233,10 +242,10 @@ bool MultiPhaseDDP<T>::backward_sweep(T regularization)
         success = phases[i]->backward_sweep(regularization, Gprime, Hprime);
         if (!success)
             return success;
-
-        // phases[i]->get_exp_cost_change(dV_1_temp, dV_2_temp);
-        // dV_1 += dV_1_temp;
-        // dV_2 += dV_2_temp;
+        
+        phases[i]->get_exp_cost_change(dV_1_i, dV_2_i);
+        dV_1 += dV_1_i;
+        dV_2 += dV_2_i;
     }
     return success;
 }
@@ -249,7 +258,8 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
     int iter_in = 0;
 
     T cost_prev(0), merit_prev(0);
-    bool success = false; // currently defined only for backward sweep
+    bool success = true; // currently defined only for backward sweep
+    int print_precision = 6;
 
     /* clear all buffer */    
     cost_buffer.clear();
@@ -270,8 +280,10 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
     update_nominal_trajectory();
     compute_cost(option);
     feas = measure_dynamics_feasibility();
+    // publish_trajectory();
+    std::cout << "Initial total cost = " << std::setprecision(print_precision) << actual_cost 
+              << " Initial infeasibility = " << feas << std::endl;
 
-    publish_trajectory();
 
     /* buffer the initial information */    
     cost_buffer.push_back(actual_cost);
@@ -319,7 +331,7 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
 #ifdef TIME_BENCHMARK
             start = high_resolution_clock::now();
 #endif
-            LQ_approximation(option);
+            LQ_approximation(option);            
             success = backward_sweep_regularized(regularization, option);
             if (!success)
             {
@@ -400,10 +412,11 @@ void MultiPhaseDDP<T>::solve(HSDDP_OPTION option)
         printf("maximum iteration reached \n");
     }
 
-    printf("total cost = %f \n", actual_cost);
-    printf("terminal constraint violation = %f \n", max_tconstr);
-    printf("path constraint violation = %f \n", fabs(max_pconstr));
-    printf("dynamics feas = %f \n", feas);
+    std::cout << "total cost = " << std::setprecision(print_precision) << actual_cost << std::endl;
+    std::cout << "terminal constraint violation = " << std::setprecision(print_precision) << max_tconstr << std::endl;
+    std::cout << "path constraint violation = " << std::setprecision(print_precision) << max_pconstr << std::endl;
+    std::cout << "dynamics feas = " << std::setprecision(print_precision) << feas << std::endl;    
+
 
 bad_solve:
     if (!success)

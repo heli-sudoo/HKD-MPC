@@ -4,6 +4,7 @@
 #include "HSDDP_CPPTypes.h"
 #include "HKDProblem.h"
 #include "TrajectoryManagement.h"
+#include <iomanip>      // std::setprecision
 
 using Eigen::IOFormat;
 template <class TrajPtrs>
@@ -15,12 +16,11 @@ void log_trajectory_sequence(TrajPtrs &traj_seq)
     string cost_log_fname = folder_name + "cost_log.txt";
     string value_grad_fname = folder_name + "value_grad_log.txt";
 
-    fstream state_fstrm(state_log_fname);
-    fstream cntrl_fstrm(cntrl_log_fname);
-    fstream cost_fstrm(cost_log_fname);
-    fstream value_grad_fstrm(value_grad_fname);
+    fstream state_fstrm(state_log_fname, std::ios_base::out | std::ios_base::trunc);
+    fstream cntrl_fstrm(cntrl_log_fname, std::ios_base::out | std::ios_base::trunc);
+    fstream cost_fstrm(cost_log_fname, std::ios_base::out | std::ios_base::trunc);
+    fstream value_grad_fstrm(value_grad_fname, std::ios_base::out | std::ios_base::trunc);
 
-    IOFormat eigFormat(Eigen::FullPrecision, 0, ",");
     if (!state_fstrm.is_open())
     {
         printf("Failed to open state log file or file not exists \n");
@@ -50,17 +50,18 @@ void log_trajectory_sequence(TrajPtrs &traj_seq)
     for (auto traj:traj_seq)
     {
         size_t horizon = traj->horizon;
-        for (size_t k = 0; k < horizon; k++)
+        size_t k(0);
+        for (k = 0; k < horizon; k++)
         {
-            cntrl_fstrm << traj->Ubar[k].transpose().format(eigFormat) << std::endl;
-            state_fstrm << traj->Xbar[k].transpose().format(eigFormat) << std::endl;
-            value_grad_fstrm << traj->G[k].transpose().format(eigFormat) << std::endl;
+            cntrl_fstrm << eigenToString(traj->Ubar[k].transpose()) << std::endl;
+            state_fstrm << eigenToString(traj->Xbar[k].transpose()) << std::endl;
+            value_grad_fstrm << eigenToString(traj->G[k].transpose()) << std::endl;
             cost_fstrm << traj->rcostData[k].l << std::endl;
         }
-        cntrl_fstrm << traj->Ubar[horizon-1].transpose().format(eigFormat) << std::endl;
-        state_fstrm << traj->Xbar[horizon].transpose().format(eigFormat) << std::endl; // log terminal state
-        value_grad_fstrm << traj->G[horizon].transpose().format(eigFormat) << std::endl;
-        cost_fstrm << traj->tcostData.Phi << std::endl;
+        cntrl_fstrm << eigenToString(traj->Ubar[k].transpose()) << std::endl;
+        state_fstrm << eigenToString(traj->Xbar[k].transpose()) << std::endl; // log terminal state
+        value_grad_fstrm << eigenToString(traj->G[k].transpose()) << std::endl;
+        cost_fstrm  << traj->tcostData.Phi << std::endl;
     }
     printf("DONE! \n");
     state_fstrm.close();

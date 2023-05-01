@@ -166,7 +166,7 @@ T mapToRange(T x, T inputMin, T inputMax, T outputMin, T outputMax) {
  * Convert eigen type to std::string.
  */
 template <typename T>
-std::string eigenToString(Eigen::MatrixBase<T>& value) {
+std::string eigenToString(const Eigen::MatrixBase<T>& value) {
   std::stringstream ss;
   ss << value;
   return ss.str();

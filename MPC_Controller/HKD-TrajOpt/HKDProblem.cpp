@@ -192,14 +192,13 @@ void HKDProblem<T>::create_problem_one_phase(shared_ptr<SinglePhase<T,24,24,0>> 
     phase->set_resetmap(resetmap_callback);
     phase->set_resetmap_partial(resetmap_partial_callback);
 
-    /* set cost management */
-    // tracking cost
+    /* set tracking cost */
     shared_ptr<HKDTrackingCost<T>> track_cost;
     track_cost = make_shared<HKDTrackingCost<T>>(ctact);
     track_cost->set_reference(&(ref_data->Xr[idx]), &(ref_data->Ur[idx]), &(ref_data->Yr[idx]));
     phase->add_cost(track_cost);
 
-    // foot regularization
+    /* foot regularization */
     shared_ptr<HKDFootPlaceReg<T>> foot_reg;
     foot_reg = make_shared<HKDFootPlaceReg<T>>(ctact);
     foot_reg->set_reference(&(ref_data->Xr[idx]));

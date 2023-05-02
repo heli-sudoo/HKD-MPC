@@ -6,7 +6,7 @@ implementation for the MIT Mini Cheetah.
 <img src="demo/A1_jump.gif" height="130">  <img src="demo/A1_hop.gif" height="130"> <img src="demo/MC_hop.gif" height="130">
 
 ## **Dependency**
-This implementation only requires two external dependencies, Eigen and LCM. A customized Hybrid-Systems DDP solver is employed to solve the nonlinear trajectory optimization problem, which is part of this repo, and can be found [here](https://github.com/heli-sudoo/HKD-MPC/tree/ICRA22%2BIROS23/MPC_Controller/HSDDPSolver).
+This implementation only requires two external dependencies, Eigen and LCM. A customized **Hybrid-Systems DDP (HS-DDP)** solver is employed to solve the nonlinear trajectory optimization problem. A C++ implementation of **HS-DDP** is included in this repo and can be found [here](https://github.com/heli-sudoo/HKD-MPC/tree/ICRA22%2BIROS23/MPC_Controller/HSDDPSolver).
 - [Eigen3](https://gitlab.com/libeigen/eigen)
 - [LCM1.4.0](https://github.com/lcm-proj/lcm/releases)
 

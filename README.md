@@ -31,7 +31,7 @@ make -j4
 ## **Run in Cheetah Software**
 Instructions coming soon
 
-## **Publications**
-[1] Li, H., Yu, W., Zhang, T., & Wensing, P. M. (2022, October). Zero-shot retargeting of learned quadruped locomotion policies using hybrid kinodynamic model predictive control. In 2022 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 11971-11977). IEEE.
+## **Selected Publications**
+[1] Li, H., & Wensing, P. M. (2020). Hybrid systems differential dynamic programming for whole-body motion planning of legged robots. IEEE Robotics and Automation Letters, 5(4), 5448-5455.
 
 [2] Li, H., Zhang, T., Yu, W., & Wensing, P. M. (2022). Versatile Real-Time Motion Synthesis via Kino-Dynamic MPC with Hybrid-Systems DDP. arXiv preprint arXiv:2209.14138.

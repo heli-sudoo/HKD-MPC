@@ -1,0 +1,11 @@
+struct mc_towr_data_t
+{
+    int16_t len;
+    int32_t microtime[len];
+    float base_pos[len][3];
+    float base_vel[len][3];
+    float eul[len][3];
+    float eulrate[len][3];
+    float ee_pos[len][12];
+    int16_t contact[len][4];
+}

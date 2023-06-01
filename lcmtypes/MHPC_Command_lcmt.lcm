@@ -1,0 +1,14 @@
+struct MHPC_Command_lcmt {
+    int32_t N_mpcsteps;
+    float mpc_times[3];
+    float torque[3][12];    
+    float eul[3][3];
+    float pos[3][3];
+    float qJ[3][12];
+    float vWorld[3][3];
+    float eulrate[3][3];        
+    float qJd[3][12];
+    int32_t contacts[3][4];
+    float statusTimes[3][4];          
+    float solve_time;
+}

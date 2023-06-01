@@ -1,0 +1,11 @@
+struct MHPC_Data_lcmt {
+    boolean reset_mpc;
+    boolean MS;
+    double mpctime;    
+    float pos[3];
+    float eul[3];    
+    float qJ[12];
+    float vWorld[3];
+    float eulrate[3];    
+    float qJd[12];    
+}

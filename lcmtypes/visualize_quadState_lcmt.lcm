@@ -1,0 +1,12 @@
+struct visualize_quadState_lcmt {
+    float pos[3];
+    float eul[3];
+    float vWorld[3];
+    float eulrate[3];
+    float qJ[12];
+    float qJd[12];
+    float pFoot[12];
+    float Jc[12][18];
+    float qJdd[12];    
+    float torque[12];
+}

@@ -1,0 +1,7 @@
+struct solver_info_lcmt {
+    int32_t n_iter;
+    float cost[n_iter];
+    float dyn_feas[n_iter];
+    float eqn_feas[n_iter];
+    float ineq_feas[n_iter];   
+}

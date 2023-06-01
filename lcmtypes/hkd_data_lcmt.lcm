@@ -1,0 +1,12 @@
+struct hkd_data_lcmt {
+    boolean reset_mpc;
+    boolean MS;
+    double mpctime;
+    int32_t contact[4];
+    float p[3];
+    float vWorld[3];
+    float rpy[3];
+    float omegaBody[3];
+    float qJ[12];
+    float foot_placements[12];
+}

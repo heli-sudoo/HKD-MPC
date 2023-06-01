@@ -1,0 +1,7 @@
+struct solver_intermtraj_lcmt {
+    int32_t tau_sz;
+    int32_t x_sz;
+    int32_t u_sz;
+    float x_tau[tau_sz][x_sz];
+    float u_tau[tau_sz][u_sz];
+}

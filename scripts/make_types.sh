@@ -6,7 +6,7 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN} Starting LCM type generation...${NC}"
 
-cd ../lcm-types
+cd ../lcmtypes
 # Clean
 rm */*.jar
 rm */*.java

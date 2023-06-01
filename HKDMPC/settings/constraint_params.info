@@ -1,0 +1,20 @@
+GRF_ReB
+{
+    delta           0.1
+    delta_min       0.1
+    eps             0.1
+}
+
+Swing_ReB
+{
+    delta           1.0
+    delta_min       0.5
+    eps             0.01
+}
+
+TD_AL
+{
+    sigma           50
+    sigma_max       1e4
+    lambda          0
+}

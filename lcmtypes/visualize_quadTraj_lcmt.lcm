@@ -1,0 +1,16 @@
+struct visualize_quadTraj_lcmt {
+    int16_t len;
+    float WB_plan_dur;
+    float SRB_plan_dur;
+    float WB_dt;
+    float SRB_dt;
+    float pos[len][3];
+    float eul[len][3];
+    float vWorld[len][3];
+    float eulrate[len][3];
+    float qJ[len][12];   
+    float pFoot[len][12];   
+    float torque[len][12];
+    float grf[len][12];
+    float feas[len];
+}

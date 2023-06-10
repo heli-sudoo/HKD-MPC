@@ -10,25 +10,24 @@ except ImportError:
 import struct
 
 class MHPC_Command_lcmt(object):
-    __slots__ = ["N_mpcsteps", "mpc_times", "torque", "eul", "pos", "qJ", "vWorld", "eulrate", "qJd", "feedback", "contacts", "statusTimes", "solve_time"]
+    __slots__ = ["N_mpcsteps", "mpc_times", "torque", "eul", "pos", "qJ", "vWorld", "eulrate", "qJd", "contacts", "statusTimes", "solve_time"]
 
-    __typenames__ = ["int32_t", "float", "float", "float", "float", "float", "float", "float", "float", "float", "int32_t", "float", "float"]
+    __typenames__ = ["int32_t", "float", "float", "float", "float", "float", "float", "float", "float", "int32_t", "float", "float"]
 
-    __dimensions__ = [None, [4], [4, 12], [4, 3], [4, 3], [4, 12], [4, 3], [4, 3], [4, 12], [4, 432], [4, 4], [4, 4], None]
+    __dimensions__ = [None, [3], [3, 12], [3, 3], [3, 3], [3, 12], [3, 3], [3, 3], [3, 12], [3, 4], [3, 4], None]
 
     def __init__(self):
         self.N_mpcsteps = 0
-        self.mpc_times = [ 0.0 for dim0 in range(4) ]
-        self.torque = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(4) ]
-        self.eul = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(4) ]
-        self.pos = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(4) ]
-        self.qJ = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(4) ]
-        self.vWorld = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(4) ]
-        self.eulrate = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(4) ]
-        self.qJd = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(4) ]
-        self.feedback = [ [ 0.0 for dim1 in range(432) ] for dim0 in range(4) ]
-        self.contacts = [ [ 0 for dim1 in range(4) ] for dim0 in range(4) ]
-        self.statusTimes = [ [ 0.0 for dim1 in range(4) ] for dim0 in range(4) ]
+        self.mpc_times = [ 0.0 for dim0 in range(3) ]
+        self.torque = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(3) ]
+        self.eul = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(3) ]
+        self.pos = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(3) ]
+        self.qJ = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(3) ]
+        self.vWorld = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(3) ]
+        self.eulrate = [ [ 0.0 for dim1 in range(3) ] for dim0 in range(3) ]
+        self.qJd = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(3) ]
+        self.contacts = [ [ 0 for dim1 in range(4) ] for dim0 in range(3) ]
+        self.statusTimes = [ [ 0.0 for dim1 in range(4) ] for dim0 in range(3) ]
         self.solve_time = 0.0
 
     def encode(self):
@@ -39,26 +38,24 @@ class MHPC_Command_lcmt(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.N_mpcsteps))
-        buf.write(struct.pack('>4f', *self.mpc_times[:4]))
-        for i0 in range(4):
+        buf.write(struct.pack('>3f', *self.mpc_times[:3]))
+        for i0 in range(3):
             buf.write(struct.pack('>12f', *self.torque[i0][:12]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>3f', *self.eul[i0][:3]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>3f', *self.pos[i0][:3]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>12f', *self.qJ[i0][:12]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>3f', *self.vWorld[i0][:3]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>3f', *self.eulrate[i0][:3]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>12f', *self.qJd[i0][:12]))
-        for i0 in range(4):
-            buf.write(struct.pack('>432f', *self.feedback[i0][:432]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>4i', *self.contacts[i0][:4]))
-        for i0 in range(4):
+        for i0 in range(3):
             buf.write(struct.pack('>4f', *self.statusTimes[i0][:4]))
         buf.write(struct.pack(">f", self.solve_time))
 
@@ -75,36 +72,33 @@ class MHPC_Command_lcmt(object):
     def _decode_one(buf):
         self = MHPC_Command_lcmt()
         self.N_mpcsteps = struct.unpack(">i", buf.read(4))[0]
-        self.mpc_times = struct.unpack('>4f', buf.read(16))
+        self.mpc_times = struct.unpack('>3f', buf.read(12))
         self.torque = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.torque.append(struct.unpack('>12f', buf.read(48)))
         self.eul = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.eul.append(struct.unpack('>3f', buf.read(12)))
         self.pos = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.pos.append(struct.unpack('>3f', buf.read(12)))
         self.qJ = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.qJ.append(struct.unpack('>12f', buf.read(48)))
         self.vWorld = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.vWorld.append(struct.unpack('>3f', buf.read(12)))
         self.eulrate = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.eulrate.append(struct.unpack('>3f', buf.read(12)))
         self.qJd = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.qJd.append(struct.unpack('>12f', buf.read(48)))
-        self.feedback = []
-        for i0 in range(4):
-            self.feedback.append(struct.unpack('>432f', buf.read(1728)))
         self.contacts = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.contacts.append(struct.unpack('>4i', buf.read(16)))
         self.statusTimes = []
-        for i0 in range(4):
+        for i0 in range(3):
             self.statusTimes.append(struct.unpack('>4f', buf.read(16)))
         self.solve_time = struct.unpack(">f", buf.read(4))[0]
         return self
@@ -113,7 +107,7 @@ class MHPC_Command_lcmt(object):
     _hash = None
     def _get_hash_recursive(parents):
         if MHPC_Command_lcmt in parents: return 0
-        tmphash = (0xadd72c9ceb3b5e16) & 0xffffffffffffffff
+        tmphash = (0x5f55cf04f3c2c6de) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

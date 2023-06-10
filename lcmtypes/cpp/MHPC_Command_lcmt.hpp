@@ -16,27 +16,25 @@ class MHPC_Command_lcmt
     public:
         int32_t    N_mpcsteps;
 
-        float      mpc_times[4];
+        float      mpc_times[3];
 
-        float      torque[4][12];
+        float      torque[3][12];
 
-        float      eul[4][3];
+        float      eul[3][3];
 
-        float      pos[4][3];
+        float      pos[3][3];
 
-        float      qJ[4][12];
+        float      qJ[3][12];
 
-        float      vWorld[4][3];
+        float      vWorld[3][3];
 
-        float      eulrate[4][3];
+        float      eulrate[3][3];
 
-        float      qJd[4][12];
+        float      qJd[3][12];
 
-        float      feedback[4][432];
+        int32_t    contacts[3][4];
 
-        int32_t    contacts[4][4];
-
-        float      statusTimes[4][4];
+        float      statusTimes[3][4];
 
         float      solve_time;
 
@@ -139,55 +137,50 @@ int MHPC_Command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->N_mpcsteps, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 4);
+    tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 3);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->torque[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->eul[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->pos[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->qJ[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->vWorld[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->eulrate[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->qJd[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
-        tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->feedback[a0][0], 432);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
-
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->contacts[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->statusTimes[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
@@ -205,55 +198,50 @@ int MHPC_Command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->N_mpcsteps, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 4);
+    tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 3);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->torque[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->eul[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->pos[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->qJ[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->vWorld[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->eulrate[a0][0], 3);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->qJd[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
-        tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->feedback[a0][0], 432);
-        if(tlen < 0) return tlen; else pos += tlen;
-    }
-
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->contacts[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 4; a0++) {
+    for (int a0 = 0; a0 < 3; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->statusTimes[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
@@ -268,24 +256,23 @@ int MHPC_Command_lcmt::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __float_encoded_array_size(NULL, 4);
-    enc_size += 4 * __float_encoded_array_size(NULL, 12);
-    enc_size += 4 * __float_encoded_array_size(NULL, 3);
-    enc_size += 4 * __float_encoded_array_size(NULL, 3);
-    enc_size += 4 * __float_encoded_array_size(NULL, 12);
-    enc_size += 4 * __float_encoded_array_size(NULL, 3);
-    enc_size += 4 * __float_encoded_array_size(NULL, 3);
-    enc_size += 4 * __float_encoded_array_size(NULL, 12);
-    enc_size += 4 * __float_encoded_array_size(NULL, 432);
-    enc_size += 4 * __int32_t_encoded_array_size(NULL, 4);
-    enc_size += 4 * __float_encoded_array_size(NULL, 4);
+    enc_size += __float_encoded_array_size(NULL, 3);
+    enc_size += 3 * __float_encoded_array_size(NULL, 12);
+    enc_size += 3 * __float_encoded_array_size(NULL, 3);
+    enc_size += 3 * __float_encoded_array_size(NULL, 3);
+    enc_size += 3 * __float_encoded_array_size(NULL, 12);
+    enc_size += 3 * __float_encoded_array_size(NULL, 3);
+    enc_size += 3 * __float_encoded_array_size(NULL, 3);
+    enc_size += 3 * __float_encoded_array_size(NULL, 12);
+    enc_size += 3 * __int32_t_encoded_array_size(NULL, 4);
+    enc_size += 3 * __float_encoded_array_size(NULL, 4);
     enc_size += __float_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t MHPC_Command_lcmt::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xadd72c9ceb3b5e16LL;
+    uint64_t hash = 0x5f55cf04f3c2c6deLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

@@ -8,4 +8,6 @@ struct hkd_command_lcmt {
     float foot_placement[12];       
     float feedback[10][12][12];
     float solve_time;
+
+    float qJ_ref[12];
 }

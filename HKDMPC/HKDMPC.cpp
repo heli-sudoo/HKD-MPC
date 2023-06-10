@@ -23,8 +23,8 @@ void HKDMPCSolver<T>::initialize()
     std::string fname_ddp_setting("../HKDMPC/settings/ddp_setting.info");
     loadHSDDPSetting(fname_ddp_setting, ddp_options);
 
-    mpc_config.plan_duration = .6;
-    mpc_config.nsteps_between_mpc = 1;
+    mpc_config.plan_duration = 0.6;
+    mpc_config.nsteps_between_mpc = 2;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
 
@@ -291,6 +291,12 @@ void HKDMPCSolver<T>::publish_mpc_cmd()
         hkd_cmds.foot_placement[3 * l + 2] = pf[l][2];
     }
     hkd_cmds.solve_time = solve_time;
+
+    QuadAugmentedState* quad_ref_aug_state = opt_problem_data.quad_ref_ptr->get_a_reference_ptr_at_t(mpc_time);
+    for (int i = 0; i < 12; i++){
+        hkd_cmds.qJ_ref[i] = quad_ref_aug_state->qJ[i];
+    }
+
     mpc_lcm.publish("mpc_command", &hkd_cmds);
     printf(GRN);
     printf("published a mpc command message \n");

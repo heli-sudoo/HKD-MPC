@@ -2,11 +2,12 @@ addpath("PreProcessedData");
 addpath("PostProcessedData/");
 
 % load("Inplace-trot.mat");
+load("PreProcessedData/MIP_Hopping/"+name+"/Data.mat");
 
 %%
 tau_sz = size(body_states, 1);
 status_durations = zeros(tau_sz, 4);
-GRFs = zeros(tau_sz, 12);
+GRFs = grfs;
 torques = zeros(tau_sz, 12);
 
 % Calculate contact status durations for each leg 
@@ -16,19 +17,19 @@ for leg = 1:4
 end
 
 % Calculate the GRF reference
-mass = 9; g = 10;
-for k = 1:tau_sz
-    F = [0, 0, mass * g / sum(contacts(k, :))];
-    for leg = 1: 4
-        if contacts(k, leg)
-            GRFs(k, 3*(leg-1)+1:3*leg) = F;
-        end
-    end    
-end
+% mass = 9; g = 10;
+% for k = 1:tau_sz
+%     F = [0, 0, mass * g / sum(contacts(k, :))];
+%     for leg = 1: 4
+%         if contacts(k, leg)
+%             GRFs(k, 3*(leg-1)+1:3*leg) = F;
+%         end
+%     end    
+% end
 
 %% Write to file
 % write contact information to csv file
-fname = "PostProcessedData/"+"quad_reference.csv";
+fname = "PostProcessedData/"+"quad_reference-"+name+".csv";
 fid = fopen(fname, 'w');
 fprintf(fid, 'dt\n');
 fprintf(fid, '%4.3f\n', dt);
@@ -38,6 +39,9 @@ for i = 1:tau_sz
     
     fprintf(fid, 'qJ\n');
     fprintf_array(fid, qJs(i, :), '%6.3f ');
+
+    fprintf(fid, 'qJd\n');
+    fprintf_array(fid, qJds(i,:), '%6.3f ');
 
     fprintf(fid, 'foot_placements\n');
     fprintf_array(fid, foot_placements(i, :), '%6.3f ');
@@ -53,11 +57,15 @@ for i = 1:tau_sz
 
     fprintf(fid, 'status_dur\n');
     fprintf_array(fid, status_durations(i, :), '%6.3f ');
+
+    fprintf(fid, 'center_point\n');
+    fprintf_array(fid, center_point(i,:), '%6.3f ');
+
+    fprintf(fid, 'plane_coefficients\n');
+    fprintf_array(fid, plane_coefficients(i,:), '%6.3f ');
+
 end
 fclose(fid);
-
-
-
 
 %% Help functions
 function status_durs = Induce_status_duration_per_leg(contacts_leg, dt)

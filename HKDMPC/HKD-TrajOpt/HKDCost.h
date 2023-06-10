@@ -11,10 +11,14 @@ public:
     HKDTrackingCost(VecM<int, 4> contact) : QuadraticTrackingCost<T, HKD::xs, HKD::us, HKD::ys>()
     {
         /* Intermediate state weighting matrix */
+        // VecM<T, 3> q_eul(1, 4, 5);
+        // VecM<T, 3> q_pos(1, 1, 30);
+        // VecM<T, 3> q_omega(.2, .2, .2);
+        // VecM<T, 3> q_v(4, 1, .5);
         VecM<T, 3> q_eul(1, 4, 5);
-        VecM<T, 3> q_pos(1, 1, 30);
+        VecM<T, 3> q_pos(20, 1, 30);
         VecM<T, 3> q_omega(.2, .2, .2);
-        VecM<T, 3> q_v(4, 1, .5);
+        VecM<T, 3> q_v(10, 1, 20);
         VecM<T, 12> q_qJ;                        
         q_qJ << VecM<T, 3>::Constant(.2 * (1 - contact[0])),
                 VecM<T, 3>::Constant(.2 * (1 - contact[1])),
@@ -67,6 +71,7 @@ public:
         dprel_dx.block(9, 21, 3, 3) << contact[3]*Mat3<T>::Identity(); 
         
         Qfoot *= 20;
+        // Qfoot *= 1000;
 
         quad_reference = nullptr;
         quad_astate = nullptr;

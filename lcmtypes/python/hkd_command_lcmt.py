@@ -10,11 +10,11 @@ except ImportError:
 import struct
 
 class hkd_command_lcmt(object):
-    __slots__ = ["N_mpcsteps", "mpc_times", "hkd_controls", "des_body_state", "contacts", "statusTimes", "foot_placement", "feedback", "solve_time", "qJ_ref"]
+    __slots__ = ["N_mpcsteps", "mpc_times", "hkd_controls", "des_body_state", "contacts", "statusTimes", "foot_placement", "feedback", "solve_time", "qJ_ref", "qJd_ref"]
 
-    __typenames__ = ["int32_t", "double", "float", "float", "int32_t", "double", "float", "float", "float", "float"]
+    __typenames__ = ["int32_t", "double", "float", "float", "int32_t", "double", "float", "float", "float", "float", "float"]
 
-    __dimensions__ = [None, [10], [10, 24], [10, 12], [10, 4], [10, 4], [12], [10, 12, 12], None, [12]]
+    __dimensions__ = [None, [10], [10, 24], [10, 12], [10, 4], [10, 4], [12], [10, 12, 12], None, [12], [12]]
 
     def __init__(self):
         self.N_mpcsteps = 0
@@ -27,6 +27,7 @@ class hkd_command_lcmt(object):
         self.feedback = [ [ [ 0.0 for dim2 in range(12) ] for dim1 in range(12) ] for dim0 in range(10) ]
         self.solve_time = 0.0
         self.qJ_ref = [ 0.0 for dim0 in range(12) ]
+        self.qJd_ref = [ 0.0 for dim0 in range(12) ]
 
     def encode(self):
         buf = BytesIO()
@@ -51,6 +52,7 @@ class hkd_command_lcmt(object):
                 buf.write(struct.pack('>12f', *self.feedback[i0][i1][:12]))
         buf.write(struct.pack(">f", self.solve_time))
         buf.write(struct.pack('>12f', *self.qJ_ref[:12]))
+        buf.write(struct.pack('>12f', *self.qJd_ref[:12]))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -86,13 +88,14 @@ class hkd_command_lcmt(object):
                 self.feedback[i0].append(struct.unpack('>12f', buf.read(48)))
         self.solve_time = struct.unpack(">f", buf.read(4))[0]
         self.qJ_ref = struct.unpack('>12f', buf.read(48))
+        self.qJd_ref = struct.unpack('>12f', buf.read(48))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if hkd_command_lcmt in parents: return 0
-        tmphash = (0x64b543aed2234b9d) & 0xffffffffffffffff
+        tmphash = (0xf2edcb0642c5f851) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

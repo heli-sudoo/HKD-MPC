@@ -21,6 +21,7 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
     public float feedback[][][];
     public float solve_time;
     public float qJ_ref[];
+    public float qJd_ref[];
  
     public hkd_command_lcmt()
     {
@@ -32,10 +33,11 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         foot_placement = new float[12];
         feedback = new float[10][12][12];
         qJ_ref = new float[12];
+        qJd_ref = new float[12];
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x64b543aed2234b9dL;
+    public static final long LCM_FINGERPRINT_BASE = 0xf2edcb0642c5f851L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -107,6 +109,10 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         for (int a = 0; a < 12; a++) {
             outs.writeFloat(this.qJ_ref[a]); 
+        }
+ 
+        for (int a = 0; a < 12; a++) {
+            outs.writeFloat(this.qJd_ref[a]); 
         }
  
     }
@@ -189,6 +195,11 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
             this.qJ_ref[a] = ins.readFloat();
         }
  
+        this.qJd_ref = new float[(int) 12];
+        for (int a = 0; a < 12; a++) {
+            this.qJd_ref[a] = ins.readFloat();
+        }
+ 
     }
  
     public lcmtypes.hkd_command_lcmt copy()
@@ -226,6 +237,8 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         outobj.qJ_ref = new float[(int) 12];
         System.arraycopy(this.qJ_ref, 0, outobj.qJ_ref, 0, 12); 
+        outobj.qJd_ref = new float[(int) 12];
+        System.arraycopy(this.qJd_ref, 0, outobj.qJd_ref, 0, 12); 
         return outobj;
     }
  

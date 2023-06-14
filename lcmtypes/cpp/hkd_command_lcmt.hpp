@@ -34,6 +34,8 @@ class hkd_command_lcmt
 
         float      qJ_ref[12];
 
+        float      qJd_ref[12];
+
     public:
         /**
          * Encode a message into binary form.
@@ -172,6 +174,9 @@ int hkd_command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->qJ_ref[0], 12);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->qJd_ref[0], 12);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -221,6 +226,9 @@ int hkd_command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->qJ_ref[0], 12);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->qJd_ref[0], 12);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -237,12 +245,13 @@ int hkd_command_lcmt::_getEncodedSizeNoHash() const
     enc_size += 10 * 12 * __float_encoded_array_size(NULL, 12);
     enc_size += __float_encoded_array_size(NULL, 1);
     enc_size += __float_encoded_array_size(NULL, 12);
+    enc_size += __float_encoded_array_size(NULL, 12);
     return enc_size;
 }
 
 uint64_t hkd_command_lcmt::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x64b543aed2234b9dLL;
+    uint64_t hash = 0xf2edcb0642c5f851LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

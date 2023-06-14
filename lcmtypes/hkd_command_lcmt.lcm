@@ -10,4 +10,6 @@ struct hkd_command_lcmt {
     float solve_time;
 
     float qJ_ref[12];
+
+    float qJd_ref[12];
 }

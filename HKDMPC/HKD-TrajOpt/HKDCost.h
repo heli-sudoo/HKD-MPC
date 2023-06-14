@@ -11,14 +11,14 @@ public:
     HKDTrackingCost(VecM<int, 4> contact) : QuadraticTrackingCost<T, HKD::xs, HKD::us, HKD::ys>()
     {
         /* Intermediate state weighting matrix */
-        // VecM<T, 3> q_eul(1, 4, 5);
-        // VecM<T, 3> q_pos(1, 1, 30);
-        // VecM<T, 3> q_omega(.2, .2, .2);
-        // VecM<T, 3> q_v(4, 1, .5);
         VecM<T, 3> q_eul(1, 4, 5);
-        VecM<T, 3> q_pos(20, 1, 30);
+        VecM<T, 3> q_pos(1, 1, 30);
         VecM<T, 3> q_omega(.2, .2, .2);
-        VecM<T, 3> q_v(10, 1, 20);
+        VecM<T, 3> q_v(4, 1, .5);
+        // VecM<T, 3> q_eul(1, 4, 5);
+        // VecM<T, 3> q_pos(20, 1, 30);
+        // VecM<T, 3> q_omega(.2, .2, .2);
+        // VecM<T, 3> q_v(10, 1, 20);
         VecM<T, 12> q_qJ;                        
         q_qJ << VecM<T, 3>::Constant(.2 * (1 - contact[0])),
                 VecM<T, 3>::Constant(.2 * (1 - contact[1])),
@@ -35,7 +35,9 @@ public:
 
         /* Control weighting matrices */
         VecM<T, 24> r;        
-        r.template head<12>() = .2 * VecM<T,12>::Ones();      // GRF
+        // r.template head<12>() = .2 * VecM<T,12>::Ones();      // GRF
+        // r.template tail<12>() = .1 * VecM<T,12>::Ones();  // Commanded joint vel     
+        r.template head<12>() = .05 * VecM<T,12>::Ones();      // GRF
         r.template tail<12>() = .1 * VecM<T,12>::Ones();  // Commanded joint vel       
         this->R = r.asDiagonal();      
     }       

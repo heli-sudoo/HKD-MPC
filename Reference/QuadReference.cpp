@@ -174,16 +174,34 @@ void QuadReference::load_top_level_data(const std::string& fname, bool reorder)
 
         if (line.find("qJ") != std::string::npos)
         {
+            if (!(line.compare("qJd")==0)){
+                getline(fstrm, line);           // Get the next line
+                std::stringstream lstrm(line);  // Break the line to words (default delimeter is " ")
+
+                int i = 0;
+                while (lstrm >> word)
+                {                
+                    quad_state.qJ[i] = std::stof(word);
+                    i++;
+                    if (i >= 3 * nLegs) break;
+                }    
+
+                continue;
+            }
+        }    
+
+        if (line.find("qJd") != std::string::npos)
+        {
             getline(fstrm, line);           // Get the next line
             std::stringstream lstrm(line);  // Break the line to words (default delimeter is " ")
 
             int i = 0;
             while (lstrm >> word)
             {                
-                quad_state.qJ[i] = std::stof(word);
+                quad_state.qJd[i] = std::stof(word);
                 i++;
                 if (i >= 3 * nLegs) break;
-            }    
+            }
 
             continue;
         }       
@@ -265,6 +283,8 @@ void QuadReference::load_top_level_data(const std::string& fname, bool reorder)
                 if (i >= 3 * nLegs) break;
             }    
 
+            quad_state.print();
+
             tp_data.push_back(quad_state);           
         }       
     }
@@ -300,7 +320,7 @@ void QuadReference::reorder_states()
         state_reordered.qJ << state_org.qJ.segment<3>(3), state_org.qJ.head<3>(), state_org.qJ.tail<3>(), state_org.qJ.segment<3>(6);       
         // state_reordered.qJ << Vec3<double>(0, -0.8, 1.6).replicate<4,1>();
 
-        state_reordered.qJd.setZero();
+        state_reordered.qJd << state_org.qJd.segment<3>(3), state_org.qJd.head<3>(), state_org.qJd.tail<3>(), state_org.qJd.segment<3>(6);       
         state_reordered.foot_placements << state_org.foot_placements.segment<3>(3), state_org.foot_placements.head<3>(), 
                                            state_org.foot_placements.tail<3>(), state_org.foot_placements.segment<3>(6);
 
@@ -313,7 +333,9 @@ void QuadReference::reorder_states()
         state_reordered.status_dur << state_org.status_dur[1], state_org.status_dur[0], state_org.status_dur[3], state_org.status_dur[2];
 
         state_reordered.qJ(Eigen::seqN(1,4,3)) = -state_reordered.qJ(Eigen::seqN(1,4,3)); 
-        state_reordered.qJ(Eigen::seqN(2,4,3)) = -state_reordered.qJ(Eigen::seqN(2,4,3));         
+        state_reordered.qJ(Eigen::seqN(2,4,3)) = -state_reordered.qJ(Eigen::seqN(2,4,3));
+        state_reordered.qJd(Eigen::seqN(1,4,3)) = -state_reordered.qJd(Eigen::seqN(1,4,3)); 
+        state_reordered.qJd(Eigen::seqN(2,4,3)) = -state_reordered.qJd(Eigen::seqN(2,4,3));         
         state_reordered.torque(Eigen::seqN(1,4,3)) = -state_reordered.torque(Eigen::seqN(1,4,3)); 
         state_reordered.torque(Eigen::seqN(2,4,3)) = -state_reordered.torque(Eigen::seqN(2,4,3)); 
 

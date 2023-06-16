@@ -6,6 +6,8 @@
 #include "ConstraintsBase.h"
 #include "HSDDP_Utils.h"
 
+#include "mip_hopping.h"
+
 template<typename T>
 class GRFConstraint:public PathConstraintBase<T,24,24,0>
 {
@@ -43,14 +45,23 @@ private:
 public:
     TouchDownConstraint(const VecM<int, 4> &);
 
+    #ifdef MIP_HOPPING
+    void update_ground_height();
+    #else
     void update_ground_height(T gheight_in){
         ground_height = gheight_in;
-    }   
+    }
+    #endif   
 
     void compute_violation(const State&);
 
     void compute_partial(const State&);
-    
+
+    #ifdef MIP_HOPPING
+    VecM<T, 3> center_point;
+    VecM<T, 3> plane_coefficients;
+    #endif
+
 private:
     VecM<int, 4> impact_status;
     T ground_height;
@@ -61,6 +72,7 @@ private:
     VecM<T, 12> qdummy;
     MatMN<T, 3, 18> Jf;
     VecM<T, 18> Jz;
+
 };
 
 template<typename T>

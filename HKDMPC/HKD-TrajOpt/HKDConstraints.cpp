@@ -3,6 +3,8 @@
 #include "casadiGen_HKD.h"
 #include <cassert>
 
+#include "mip_hopping.h"
+
 template <typename T>
 GRFConstraint<T>::GRFConstraint(const VecM<int, 4> &ctact)
     : PathConstraintBase<T, 24, 24, 0>("GRF")
@@ -75,6 +77,16 @@ TouchDownConstraint<T>::TouchDownConstraint(const VecM<int, 4> &impact_status_in
     this->update_constraint_size(impact_foot_ids.size());
 }
 
+#ifdef MIP_HOPPING
+template <typename T>
+void TouchDownConstraint<T>::update_ground_height(){
+    ground_height = -1/plane_coefficients[2] *
+                       (plane_coefficients[0]*(pFoot[0]-center_point[0])  +
+                        plane_coefficients[1]*(pFoot[1]-center_point[1])) +
+                        center_point[2];
+}
+#endif
+
 template <typename T>
 void TouchDownConstraint<T>::compute_violation(const State &x)
 {
@@ -110,9 +122,19 @@ void TouchDownConstraint<T>::compute_violation(const State &x)
         casadi_interface(arg_pos, res_pos, pFoot.size(), compute_foot_position,
                          compute_foot_position_sparsity_out,
                          compute_foot_position_work);
-        
+
+        // compute ground height under the foot position
+        // needs current terrain info
+        #ifdef MIP_HOPPING
+        update_ground_height();
+        #endif
+
         // compute constraint violation
         this->data[i].h = pFoot[2] - ground_height;
+        // printf("foot %d \n", foot_id);
+        // printf("  foot height  : %f \n", pFoot[2]);
+        // printf("  ground height: %f \n", ground_height);
+        // printf("  violation    : %f \n", this->data[i].h);
        
     }
     

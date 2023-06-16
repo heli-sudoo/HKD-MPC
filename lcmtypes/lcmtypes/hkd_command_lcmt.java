@@ -20,8 +20,8 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
     public float foot_placement[];
     public float feedback[][][];
     public float solve_time;
-    public float qJ_ref[];
-    public float qJd_ref[];
+    public float qJ_ref[][];
+    public float qJd_ref[][];
  
     public hkd_command_lcmt()
     {
@@ -32,12 +32,12 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         statusTimes = new double[10][4];
         foot_placement = new float[12];
         feedback = new float[10][12][12];
-        qJ_ref = new float[12];
-        qJd_ref = new float[12];
+        qJ_ref = new float[10][12];
+        qJd_ref = new float[10][12];
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0xf2edcb0642c5f851L;
+    public static final long LCM_FINGERPRINT_BASE = 0xee82eed3b27114e4L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -107,12 +107,16 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         outs.writeFloat(this.solve_time); 
  
-        for (int a = 0; a < 12; a++) {
-            outs.writeFloat(this.qJ_ref[a]); 
+        for (int a = 0; a < 10; a++) {
+            for (int b = 0; b < 12; b++) {
+                outs.writeFloat(this.qJ_ref[a][b]); 
+            }
         }
  
-        for (int a = 0; a < 12; a++) {
-            outs.writeFloat(this.qJd_ref[a]); 
+        for (int a = 0; a < 10; a++) {
+            for (int b = 0; b < 12; b++) {
+                outs.writeFloat(this.qJd_ref[a][b]); 
+            }
         }
  
     }
@@ -190,14 +194,18 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         this.solve_time = ins.readFloat();
  
-        this.qJ_ref = new float[(int) 12];
-        for (int a = 0; a < 12; a++) {
-            this.qJ_ref[a] = ins.readFloat();
+        this.qJ_ref = new float[(int) 10][(int) 12];
+        for (int a = 0; a < 10; a++) {
+            for (int b = 0; b < 12; b++) {
+                this.qJ_ref[a][b] = ins.readFloat();
+            }
         }
  
-        this.qJd_ref = new float[(int) 12];
-        for (int a = 0; a < 12; a++) {
-            this.qJd_ref[a] = ins.readFloat();
+        this.qJd_ref = new float[(int) 10][(int) 12];
+        for (int a = 0; a < 10; a++) {
+            for (int b = 0; b < 12; b++) {
+                this.qJd_ref[a][b] = ins.readFloat();
+            }
         }
  
     }
@@ -235,10 +243,14 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         outobj.solve_time = this.solve_time;
  
-        outobj.qJ_ref = new float[(int) 12];
-        System.arraycopy(this.qJ_ref, 0, outobj.qJ_ref, 0, 12); 
-        outobj.qJd_ref = new float[(int) 12];
-        System.arraycopy(this.qJd_ref, 0, outobj.qJd_ref, 0, 12); 
+        outobj.qJ_ref = new float[(int) 10][(int) 12];
+        for (int a = 0; a < 10; a++) {
+            System.arraycopy(this.qJ_ref[a], 0, outobj.qJ_ref[a], 0, 12);        }
+ 
+        outobj.qJd_ref = new float[(int) 10][(int) 12];
+        for (int a = 0; a < 10; a++) {
+            System.arraycopy(this.qJd_ref[a], 0, outobj.qJd_ref[a], 0, 12);        }
+ 
         return outobj;
     }
  

@@ -292,10 +292,13 @@ void HKDMPCSolver<T>::publish_mpc_cmd()
     }
     hkd_cmds.solve_time = solve_time;
 
-    QuadAugmentedState* quad_ref_aug_state = opt_problem_data.quad_ref_ptr->get_a_reference_ptr_at_t(mpc_time);
-    for (int i = 0; i < 12; i++){
-        hkd_cmds.qJ_ref[i] = quad_ref_aug_state->qJ[i];
-        hkd_cmds.qJd_ref[i] = quad_ref_aug_state->qJd[i];
+    QuadAugmentedState* quad_ref_aug_state;
+    for (int k = 0; k < hkd_cmds.N_mpcsteps; k++){
+        quad_ref_aug_state = opt_problem_data.quad_ref_ptr->get_a_reference_ptr_at_t(hkd_cmds.mpc_times[k] - hkd_cmds.mpc_times[0]);
+        for (int i = 0; i < 12; i++){
+            hkd_cmds.qJ_ref[k][i] = quad_ref_aug_state->qJ[i];
+            hkd_cmds.qJd_ref[k][i] = quad_ref_aug_state->qJd[i];
+        }
     }
     
     mpc_lcm.publish("mpc_command", &hkd_cmds);

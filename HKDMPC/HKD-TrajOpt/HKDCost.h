@@ -24,7 +24,8 @@ public:
                 VecM<T, 3>::Constant(.2 * (1 - contact[1])),
                 VecM<T, 3>::Constant(.2 * (1 - contact[2])),
                 VecM<T, 3>::Constant(.2 * (1 - contact[3]));
-       this->Q.diagonal() << q_eul, q_pos, q_omega, q_v, q_qJ;
+    //    this->Q.diagonal() << q_eul, q_pos, q_omega, q_v, q_qJ;
+        this->Q.diagonal() << q_eul, q_pos, q_omega, q_v, q_qJ;
         
         /* Terminal state weighting matrix */
         VecM<T, 24> scale;
@@ -37,7 +38,8 @@ public:
         VecM<T, 24> r;        
         // r.template head<12>() = .2 * VecM<T,12>::Ones();      // GRF
         // r.template tail<12>() = .1 * VecM<T,12>::Ones();  // Commanded joint vel     
-        r.template head<12>() = .05 * VecM<T,12>::Ones();      // GRF
+        // r.template head<12>() = .05 * VecM<T,12>::Ones();      // GRF
+        r.template head<12>() = .01 * VecM<T,12>::Ones();      // GRF
         r.template tail<12>() = .1 * VecM<T,12>::Ones();  // Commanded joint vel       
         this->R = r.asDiagonal();      
     }       
@@ -73,7 +75,6 @@ public:
         dprel_dx.block(9, 21, 3, 3) << contact[3]*Mat3<T>::Identity(); 
         
         Qfoot *= 20;
-        // Qfoot *= 1000;
 
         quad_reference = nullptr;
         quad_astate = nullptr;

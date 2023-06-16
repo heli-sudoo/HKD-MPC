@@ -4,7 +4,7 @@ clear all;
 % Gait = "MixedHopping/";
 % Gait = "RunJump_ICRA23/";
 % Gait = "Trot/";
-name = 'SingleHop_dqJ';
+name = 'OnBoxOffBox';
 Gait = "MIP_Hopping/"+name+"/";
 
 body_states = readmatrix(Gait + "body_state.csv");

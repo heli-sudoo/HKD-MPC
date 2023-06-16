@@ -303,6 +303,11 @@ void HKDProblem<T>::add_tconstr_one_phase(shared_ptr<SinglePhase<T, 24, 24, 0>> 
     {
         shared_ptr<TouchDownConstraint<T>> tdConstraint;
         tdConstraint = std::make_shared<TouchDownConstraint<T>>(touchdown_status);
+        #ifdef MIP_HOPPING
+        QuadAugmentedState* quad_state = quad_ref_ptr->get_a_reference_ptr_at_t(pdata->phase_end_times[idx]-pdata->phase_start_times[0]);
+        tdConstraint->center_point = quad_state->center_point;
+        tdConstraint->plane_coefficients = quad_state->plane_coefficients;
+        #endif
         tdConstraint->create_data();
         tdConstraint->initialize_params(td_al_param);
         phase->add_terminalConstraint(tdConstraint);

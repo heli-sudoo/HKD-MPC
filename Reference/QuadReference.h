@@ -11,6 +11,8 @@
 #include "HSDDP_CPPTypes.h"
 #include "HSDDP_Utils.h"
 
+#include "mip_hopping.h"
+
 struct QuadAugmentedState
 {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -23,6 +25,10 @@ struct QuadAugmentedState
     VecM<double, 12> torque;          // Joint torque reference
     VecM<int, 4> contact;            // contact status
     VecM<double, 4> status_dur;       // contact status duration
+    #ifdef MIP_HOPPING
+    VecM<double, 3> center_point; // point on the plane of current terain
+    VecM<double, 3> plane_coefficients; // coefficients of the plane of current terrain
+    #endif
 
     void SetZero()
     {
@@ -34,6 +40,10 @@ struct QuadAugmentedState
         torque.setZero();
         contact.setZero();
         status_dur.setZero();
+        #ifdef MIP_HOPPING
+        center_point.setZero();
+        plane_coefficients.setZero();
+        #endif
     }
 
     void print()
@@ -61,6 +71,14 @@ struct QuadAugmentedState
 
         std::cout << "status_dur = \n";
         std::cout << status_dur.transpose() << "\n";
+
+        #ifdef MIP_HOPPING
+        std::cout << "center_point = \n";
+        std::cout << center_point.transpose() << "\n";
+
+        std::cout << "plane_coefficients = \n";
+        std::cout << plane_coefficients.transpose() << "\n";
+        #endif
     }
 };
 

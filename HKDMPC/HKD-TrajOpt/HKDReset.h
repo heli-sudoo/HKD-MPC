@@ -6,6 +6,8 @@
 #include <cassert>
 #include <vector>
 
+#include "mip_hopping.h"
+
 using std::vector;
 template <typename T>
 class HKDReset
@@ -67,7 +69,11 @@ void HKDReset<T>::resetmap(DVec<T> &xnext, DVec<T> &x, VecM<int, 4> &c, VecM<int
                              compute_foot_position_sparsity_out,
                              compute_foot_position_work);
             VecM<T,3> cmap;
+            #ifdef MIP_HOPPING
+            cmap << 1,1,1;
+            #else
             cmap << 1,1,0;
+            #endif
             qdummy.segment(3 * l, 3) = cmap.asDiagonal() * pf;
         }
     }
@@ -125,7 +131,11 @@ void HKDReset<T>::resetmap_partial(DMat<T> &Px, DVec<T> &x, VecM<int, 4> &c, Vec
                 break;
             }            
             VecM<T,3> cmap;
+            #ifdef MIP_HOPPING
+            cmap << 1,1,1;
+            #else
             cmap << 1,1,0;
+            #endif
             Jf = cmap.asDiagonal()*Jf;
             // fill in Px using Jf appropriately
             Px.block(12+3*l, 0, 3, 3) = Jf.middleCols(3,3);

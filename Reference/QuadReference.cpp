@@ -37,7 +37,7 @@ void QuadReference::step(float dt_sim)
         k_cur++;
         t_cur += dt;
 
-        data.pop_front();        
+        data.pop_front();
         data.push_back(tp_data[k_cur + sz]);
 
         // shifting the reference time
@@ -72,7 +72,7 @@ QuadAugmentedState *QuadReference::get_a_reference_ptr_at_t(float t)
     // If queried time reaches the end, use the last element
     if (k > sz)
     {
-        printf("warning: queried reference out of scope \n");
+        printf("warning: queried reference pointer out of scope \n");
         printf("queried time = %f \n\n", t + t_cur);
         k = sz;
     }
@@ -91,7 +91,7 @@ void QuadReference::get_contact_at_t(VecM<int, 4> &contact, float t)
 
     if (k > sz)
     {        
-        printf("warning: queried reference out of scope \n");
+        printf("warning: queried reference contact out of scope \n");
         printf("queried time = %f \n\n", t + t_cur);        
         k = sz;
     }
@@ -110,7 +110,7 @@ void QuadReference::get_contact_duration_at_t(VecM<double, 4>& contact_dur, floa
 
     if (k > sz)
     {
-        printf("warning: queried reference out of scope \n");
+        printf("warning: queried reference contact duration out of scope \n");
         printf("queried time at %f \n\n", t + t_cur);
         k = sz;
     }
@@ -283,12 +283,46 @@ void QuadReference::load_top_level_data(const std::string& fname, bool reorder)
                 if (i >= 3 * nLegs) break;
             }    
 
-            quad_state.print();
-
+        #ifndef MIP_HOPPING
             tp_data.push_back(quad_state);           
         }       
+        #else
+            continue;
+        }
+        if (line.find("center_point") != std::string::npos)
+        {
+            getline(fstrm, line);
+            std::stringstream lstrm(line);
+
+            int i = 0;
+            while (lstrm >> word)
+            {
+                quad_state.center_point[i] = std::stof(word);
+                i++;
+                if (i >= 3) break;
+            }
+
+            continue;
+        }
+
+        if (line.find("plane_coefficients") != std::string::npos)
+        {
+            getline(fstrm, line);
+            std::stringstream lstrm(line);
+
+            int i = 0;
+            while (lstrm >> word)
+            {
+                quad_state.plane_coefficients[i] = std::stof(word);
+                i++;
+                if (i >= 3) break;
+            }
+
+            tp_data.push_back(quad_state); 
+        }
+        #endif
     }
-    
+
     fstrm.close();
 
     /* Print the information of loaded trajectory */

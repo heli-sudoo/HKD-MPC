@@ -42,6 +42,7 @@ void HKDMPCSolver<T>::initialize()
 
     // set the initial condition
     xinit.setZero(24);
+    // QuadAugmentedState<T> init_state = quad_ref_ptr->get_a_reference_ptr_at_t
     body << 0, 0, 0, 0, 0, 0.2486, 0, 0, 0, 0, 0, 0;
     qJ << 0, -0.8, 1.6, 0, -0.8, 1.6, 0, -0.8, 1.6, 0, -0.8, 1.6;
     pos = body.segment(3, 3);
@@ -66,7 +67,7 @@ void HKDMPCSolver<T>::initialize()
 #ifdef TIME_BENCHMARK
     auto start = high_resolution_clock::now();
 #endif
-    solver.solve(ddp_options);
+    solver.solve(ddp_options);  
 #ifdef TIME_BENCHMARK
     auto stop = high_resolution_clock::now();
     auto duration = duration_ms(stop - start);
@@ -79,8 +80,8 @@ void HKDMPCSolver<T>::initialize()
                            solver_info.ineq_feas);
     publish_solver_info();    
 #endif    
-    std::string folder_name = "../HKDMPC/log/";
-    log_trajectory_sequence(folder_name, opt_problem_data.trajectory_ptrs);
+    // std::string folder_name = "../HKDMPC/log/";
+    // log_trajectory_sequence(folder_name, opt_problem_data.trajectory_ptrs);
     mpc_iter = 0;
 
     printf("Finished initializing HKDMPC Solver \n\n");
@@ -141,6 +142,8 @@ void HKDMPCSolver<T>::update()
     auto start = high_resolution_clock::now();
 #endif
     solver.solve(ddp_options);
+    // std::string folder_name = "../HKDMPC/log/";
+    // log_trajectory_sequence(folder_name, opt_problem_data.trajectory_ptrs);
 #ifdef TIME_BENCHMARK
     auto stop = high_resolution_clock::now();
     auto duration = duration_ms(stop - start);
@@ -298,6 +301,10 @@ void HKDMPCSolver<T>::publish_mpc_cmd()
         for (int i = 0; i < 12; i++){
             hkd_cmds.qJ_ref[k][i] = quad_ref_aug_state->qJ[i];
             hkd_cmds.qJd_ref[k][i] = quad_ref_aug_state->qJd[i];
+        }
+        for (int i = 0; i < 3; i ++){
+            hkd_cmds.terrain_info[k][i] = quad_ref_aug_state->center_point[i];
+            hkd_cmds.terrain_info[k][i + 3] = quad_ref_aug_state->plane_coefficients[i];
         }
     }
     

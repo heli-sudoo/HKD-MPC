@@ -22,6 +22,7 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
     public float solve_time;
     public float qJ_ref[][];
     public float qJd_ref[][];
+    public float terrain_info[][];
  
     public hkd_command_lcmt()
     {
@@ -34,10 +35,11 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         feedback = new float[10][12][12];
         qJ_ref = new float[10][12];
         qJd_ref = new float[10][12];
+        terrain_info = new float[10][6];
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0xee82eed3b27114e4L;
+    public static final long LCM_FINGERPRINT_BASE = 0x6058f41d82129614L;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -116,6 +118,12 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         for (int a = 0; a < 10; a++) {
             for (int b = 0; b < 12; b++) {
                 outs.writeFloat(this.qJd_ref[a][b]); 
+            }
+        }
+ 
+        for (int a = 0; a < 10; a++) {
+            for (int b = 0; b < 6; b++) {
+                outs.writeFloat(this.terrain_info[a][b]); 
             }
         }
  
@@ -208,6 +216,13 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
             }
         }
  
+        this.terrain_info = new float[(int) 10][(int) 6];
+        for (int a = 0; a < 10; a++) {
+            for (int b = 0; b < 6; b++) {
+                this.terrain_info[a][b] = ins.readFloat();
+            }
+        }
+ 
     }
  
     public lcmtypes.hkd_command_lcmt copy()
@@ -250,6 +265,10 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         outobj.qJd_ref = new float[(int) 10][(int) 12];
         for (int a = 0; a < 10; a++) {
             System.arraycopy(this.qJd_ref[a], 0, outobj.qJd_ref[a], 0, 12);        }
+ 
+        outobj.terrain_info = new float[(int) 10][(int) 6];
+        for (int a = 0; a < 10; a++) {
+            System.arraycopy(this.terrain_info[a], 0, outobj.terrain_info[a], 0, 6);        }
  
         return outobj;
     }

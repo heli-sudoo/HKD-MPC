@@ -36,6 +36,8 @@ class hkd_command_lcmt
 
         float      qJd_ref[10][12];
 
+        float      terrain_info[10][6];
+
     public:
         /**
          * Encode a message into binary form.
@@ -181,6 +183,11 @@ int hkd_command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    for (int a0 = 0; a0 < 10; a0++) {
+        tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->terrain_info[a0][0], 6);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
     return pos;
 }
 
@@ -237,6 +244,11 @@ int hkd_command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    for (int a0 = 0; a0 < 10; a0++) {
+        tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->terrain_info[a0][0], 6);
+        if(tlen < 0) return tlen; else pos += tlen;
+    }
+
     return pos;
 }
 
@@ -254,12 +266,13 @@ int hkd_command_lcmt::_getEncodedSizeNoHash() const
     enc_size += __float_encoded_array_size(NULL, 1);
     enc_size += 10 * __float_encoded_array_size(NULL, 12);
     enc_size += 10 * __float_encoded_array_size(NULL, 12);
+    enc_size += 10 * __float_encoded_array_size(NULL, 6);
     return enc_size;
 }
 
 uint64_t hkd_command_lcmt::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xee82eed3b27114e4LL;
+    uint64_t hash = 0x6058f41d82129614LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

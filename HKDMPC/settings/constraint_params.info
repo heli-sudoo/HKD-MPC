@@ -1,7 +1,7 @@
 GRF_ReB
 {
-    delta           0.1
-    delta_min       0.1
+    delta           1.0
+    delta_min       1.0
     eps             0.01
 }
 

@@ -165,6 +165,13 @@ void HKDMPCSolver<T>::update()
     // publish_debugfoot();
     // opt_problem.lcm_publish();
 #endif
+
+    // if (mpc_time > 0.199){
+    //     std::string folder_name = "../HKDMPC/log/";
+    //     log_trajectory_sequence(folder_name, opt_problem_data.trajectory_ptrs);
+    //     assert(1==0);
+    // }
+
     mpc_mutex.unlock();
 }
 
@@ -229,6 +236,35 @@ void HKDMPCSolver<T>::update_foot_placement()
                 {
                     const auto& qdummy_ = opt_problem_data.trajectory_ptrs[i + 1]->Xbar[0].tail(12);
                     pf[l] = qdummy_.segment(3 * l, 3).template cast<float>();
+                    
+                    const auto& state_td = opt_problem_data.trajectory_ptrs[i + 1]->Xbar[0].head(6); 
+                    // Vec3<float> eul_td = state_td.head(3).template cast<float>();
+                    Vec3<float> pcom_td = state_td.tail(3).template cast<float>();
+                    // Mat3<float> R_td;
+                    // eul_td(1) = 0.0; eul_td(2) = 0.0; // yaw-rotated frame
+                    // EulerZYX_2_SO3(eul_td, R_td);
+                    pf_body[l] = /*R_td**/(pf[l] - pcom_td);
+
+                    // const auto& state_b4td = opt_problem_data.trajectory_ptrs[i]->Xbar[0].head(6); 
+                    // Vec3<float> eul_b4td = state_b4td.head(3).template cast<float>();
+                    // Vec3<float> pcom_b4td = state_b4td.tail(3).template cast<float>();
+                    // Mat3<float> R_b4td;
+                    // EulerZYX_2_SO3(eul_b4td, R_b4td);
+                    // pf_body[l] = R_b4td.transpose()*(pf[l] - pcom_b4td);
+                    
+                    // const auto& state_b4tdh = opt_problem_data.trajectory_ptrs[i]->Xbar[opt_problem_data.trajectory_ptrs[i]->horizon].head(6);
+                    // Vec3<float> eul_b4tdh = state_b4tdh.head(3).template cast<float>();
+                    // Vec3<float> pcom_b4tdh = state_b4tdh.tail(3).template cast<float>();
+                    // Mat3<float> R_b4tdh;
+                    // EulerZYX_2_SO3(eul_b4tdh, R_b4tdh);
+                    // pf_body[l] = R_b4tdh.transpose()*(pf[l] - pcom_b4tdh);
+                    
+                    // if (l == 0){
+                    //     std::cout << "eul_b4td[0]: " << eul_b4td.transpose() << std::endl;
+                    //     std::cout << "eul_b4td[h]: " << eul_b4td.transpose() << std::endl;
+                    //     std::cout << "eul_td  : " << eul_td.transpose() << std::endl;
+                    // }
+                    
                     found_next_ctact[l] = 1;
                 }
             }
@@ -292,6 +328,10 @@ void HKDMPCSolver<T>::publish_mpc_cmd()
         hkd_cmds.foot_placement[3 * l] = pf[l][0];
         hkd_cmds.foot_placement[3 * l + 1] = pf[l][1];
         hkd_cmds.foot_placement[3 * l + 2] = pf[l][2];
+
+        hkd_cmds.foot_placement_body[3 * l] = pf_body[l][0];
+        hkd_cmds.foot_placement_body[3 * l + 1] = pf_body[l][1];
+        hkd_cmds.foot_placement_body[3 * l + 2] = pf_body[l][2];
     }
     hkd_cmds.solve_time = solve_time;
 

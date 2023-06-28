@@ -1,10 +1,10 @@
-project(MPC_CONTROLLER)
-
 cmake_minimum_required(VERSION 3.5)
 
-set(CMAKE_CXX_STANDARD 14)
+project(MPC_CONTROLLER)
 
-set(CMAKE_CXX_FLAGS "-O3 -no-pie -Wall \
+set(CMAKE_CXX_STANDARD 17)
+
+set(CMAKE_CXX_FLAGS "-O3 -march=native -no-pie -Wall \
     -Wextra -Wcast-align -Wdisabled-optimization -Wformat=2 \
     -Winit-self -Wmissing-include-dirs -Woverloaded-virtual \
     -Wshadow -Wsign-promo")

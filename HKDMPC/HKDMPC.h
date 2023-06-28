@@ -82,6 +82,7 @@ public:
 
     // foot placement
     Vec3<float> pf[4];
+    Vec3<float> pf_body[4];
 
     // mutex lock
     std::mutex mpc_mutex;    

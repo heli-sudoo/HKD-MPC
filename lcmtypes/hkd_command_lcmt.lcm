@@ -14,4 +14,6 @@ struct hkd_command_lcmt {
     float qJd_ref[10][12];
 
     float terrain_info[10][6]; 
+
+    float foot_placement_body[12]; 
 }

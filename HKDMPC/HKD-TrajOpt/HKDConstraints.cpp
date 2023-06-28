@@ -131,11 +131,6 @@ void TouchDownConstraint<T>::compute_violation(const State &x)
 
         // compute constraint violation
         this->data[i].h = pFoot[2] - ground_height;
-        // printf("foot %d \n", foot_id);
-        // printf("  foot height  : %f \n", pFoot[2]);
-        // printf("  ground height: %f \n", ground_height);
-        // printf("  violation    : %f \n", this->data[i].h);
-       
     }
     
     this->update_max_violation();

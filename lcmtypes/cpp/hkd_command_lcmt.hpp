@@ -38,6 +38,10 @@ class hkd_command_lcmt
 
         float      terrain_info[10][6];
 
+        float      foot_placement_rel_com[12];
+
+        float      vcom_td[3];
+
     public:
         /**
          * Encode a message into binary form.
@@ -188,6 +192,12 @@ int hkd_command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->foot_placement_rel_com[0], 12);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->vcom_td[0], 3);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -249,6 +259,12 @@ int hkd_command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
+    tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->foot_placement_rel_com[0], 12);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->vcom_td[0], 3);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -267,12 +283,14 @@ int hkd_command_lcmt::_getEncodedSizeNoHash() const
     enc_size += 10 * __float_encoded_array_size(NULL, 12);
     enc_size += 10 * __float_encoded_array_size(NULL, 12);
     enc_size += 10 * __float_encoded_array_size(NULL, 6);
+    enc_size += __float_encoded_array_size(NULL, 12);
+    enc_size += __float_encoded_array_size(NULL, 3);
     return enc_size;
 }
 
 uint64_t hkd_command_lcmt::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x6058f41d82129614LL;
+    uint64_t hash = 0x9669281c3ebd447fLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

@@ -10,11 +10,11 @@ except ImportError:
 import struct
 
 class hkd_command_lcmt(object):
-    __slots__ = ["N_mpcsteps", "mpc_times", "hkd_controls", "des_body_state", "contacts", "statusTimes", "foot_placement", "feedback", "solve_time", "qJ_ref", "qJd_ref", "terrain_info"]
+    __slots__ = ["N_mpcsteps", "mpc_times", "hkd_controls", "des_body_state", "contacts", "statusTimes", "foot_placement", "feedback", "solve_time", "qJ_ref", "qJd_ref", "terrain_info", "foot_placement_rel_com", "vcom_td"]
 
-    __typenames__ = ["int32_t", "double", "float", "float", "int32_t", "double", "float", "float", "float", "float", "float", "float"]
+    __typenames__ = ["int32_t", "double", "float", "float", "int32_t", "double", "float", "float", "float", "float", "float", "float", "float", "float"]
 
-    __dimensions__ = [None, [10], [10, 24], [10, 12], [10, 4], [10, 4], [12], [10, 12, 12], None, [10, 12], [10, 12], [10, 6]]
+    __dimensions__ = [None, [10], [10, 24], [10, 12], [10, 4], [10, 4], [12], [10, 12, 12], None, [10, 12], [10, 12], [10, 6], [12], [3]]
 
     def __init__(self):
         self.N_mpcsteps = 0
@@ -29,6 +29,8 @@ class hkd_command_lcmt(object):
         self.qJ_ref = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(10) ]
         self.qJd_ref = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(10) ]
         self.terrain_info = [ [ 0.0 for dim1 in range(6) ] for dim0 in range(10) ]
+        self.foot_placement_rel_com = [ 0.0 for dim0 in range(12) ]
+        self.vcom_td = [ 0.0 for dim0 in range(3) ]
 
     def encode(self):
         buf = BytesIO()
@@ -58,6 +60,8 @@ class hkd_command_lcmt(object):
             buf.write(struct.pack('>12f', *self.qJd_ref[i0][:12]))
         for i0 in range(10):
             buf.write(struct.pack('>6f', *self.terrain_info[i0][:6]))
+        buf.write(struct.pack('>12f', *self.foot_placement_rel_com[:12]))
+        buf.write(struct.pack('>3f', *self.vcom_td[:3]))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -101,13 +105,15 @@ class hkd_command_lcmt(object):
         self.terrain_info = []
         for i0 in range(10):
             self.terrain_info.append(struct.unpack('>6f', buf.read(24)))
+        self.foot_placement_rel_com = struct.unpack('>12f', buf.read(48))
+        self.vcom_td = struct.unpack('>3f', buf.read(12))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if hkd_command_lcmt in parents: return 0
-        tmphash = (0x6058f41d82129614) & 0xffffffffffffffff
+        tmphash = (0x9669281c3ebd447f) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

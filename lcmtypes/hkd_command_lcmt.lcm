@@ -15,5 +15,7 @@ struct hkd_command_lcmt {
 
     float terrain_info[10][6]; 
 
-    float foot_placement_body[12]; 
+    float foot_placement_rel_com[12]; 
+
+    float vcom_td[3];
 }

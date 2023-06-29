@@ -23,6 +23,8 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
     public float qJ_ref[][];
     public float qJd_ref[][];
     public float terrain_info[][];
+    public float foot_placement_rel_com[];
+    public float vcom_td[];
  
     public hkd_command_lcmt()
     {
@@ -36,10 +38,12 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         qJ_ref = new float[10][12];
         qJd_ref = new float[10][12];
         terrain_info = new float[10][6];
+        foot_placement_rel_com = new float[12];
+        vcom_td = new float[3];
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x6058f41d82129614L;
+    public static final long LCM_FINGERPRINT_BASE = 0x9669281c3ebd447fL;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -125,6 +129,14 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
             for (int b = 0; b < 6; b++) {
                 outs.writeFloat(this.terrain_info[a][b]); 
             }
+        }
+ 
+        for (int a = 0; a < 12; a++) {
+            outs.writeFloat(this.foot_placement_rel_com[a]); 
+        }
+ 
+        for (int a = 0; a < 3; a++) {
+            outs.writeFloat(this.vcom_td[a]); 
         }
  
     }
@@ -223,6 +235,16 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
             }
         }
  
+        this.foot_placement_rel_com = new float[(int) 12];
+        for (int a = 0; a < 12; a++) {
+            this.foot_placement_rel_com[a] = ins.readFloat();
+        }
+ 
+        this.vcom_td = new float[(int) 3];
+        for (int a = 0; a < 3; a++) {
+            this.vcom_td[a] = ins.readFloat();
+        }
+ 
     }
  
     public lcmtypes.hkd_command_lcmt copy()
@@ -270,6 +292,10 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         for (int a = 0; a < 10; a++) {
             System.arraycopy(this.terrain_info[a], 0, outobj.terrain_info[a], 0, 6);        }
  
+        outobj.foot_placement_rel_com = new float[(int) 12];
+        System.arraycopy(this.foot_placement_rel_com, 0, outobj.foot_placement_rel_com, 0, 12); 
+        outobj.vcom_td = new float[(int) 3];
+        System.arraycopy(this.vcom_td, 0, outobj.vcom_td, 0, 3); 
         return outobj;
     }
  

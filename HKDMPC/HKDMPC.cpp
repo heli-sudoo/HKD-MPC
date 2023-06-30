@@ -9,6 +9,8 @@
 #include "HKDMPC.h"
 #include "HSDDP_Utils.h"
 
+// #include <time.h>
+
 #ifdef TIME_BENCHMARK
 #include <chrono>
 using namespace std::chrono;
@@ -24,7 +26,7 @@ void HKDMPCSolver<T>::initialize()
     loadHSDDPSetting(fname_ddp_setting, ddp_options);
 
     mpc_config.plan_duration = 0.6;
-    mpc_config.nsteps_between_mpc = 2;
+    mpc_config.nsteps_between_mpc = 1;//2;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
 
@@ -99,6 +101,10 @@ void HKDMPCSolver<T>::update()
 {
     mpc_mutex.lock(); // lock mpc to prevent updating while the previous hasn't finished
 
+    // clock_t start, end;
+    // double cpu_time_used;
+    // start = clock();
+
     // use less iterations when resolving DDP
     ddp_options.max_AL_iter = 2;
     ddp_options.max_DDP_iter = 1;
@@ -171,6 +177,11 @@ void HKDMPCSolver<T>::update()
     //     log_trajectory_sequence(folder_name, opt_problem_data.trajectory_ptrs);
     //     assert(1==0);
     // }
+
+    // end = clock();
+
+    // cpu_time_used = ((double) (end-start)) / CLOCKS_PER_SEC;
+    // std::cout << "cpu_time_used: " << cpu_time_used * 1e3 << " ms." << std::endl;
 
     mpc_mutex.unlock();
 }

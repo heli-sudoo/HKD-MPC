@@ -270,7 +270,7 @@ template <typename T>
 void HKDMPCSolver<T>::publish_mpc_cmd()
 {
     int num_controls = mpc_config.nsteps_between_mpc;
-    num_controls += 7; // use 7 more controls than control duration to account for delay
+    num_controls += 20; // use 7 more controls than control duration to account for delay
 
     hkd_cmds.N_mpcsteps = num_controls;
     auto &trajseq = opt_problem_data.trajectory_ptrs;

@@ -14,21 +14,21 @@ class hkd_command_lcmt(object):
 
     __typenames__ = ["int32_t", "double", "float", "float", "int32_t", "double", "float", "float", "float", "float", "float", "float", "float", "float"]
 
-    __dimensions__ = [None, [10], [10, 24], [10, 12], [10, 4], [10, 4], [12], [10, 12, 12], None, [10, 12], [10, 12], [10, 6], [12], [3]]
+    __dimensions__ = [None, [25], [25, 24], [25, 12], [25, 4], [25, 4], [12], [25, 12, 12], None, [25, 12], [25, 12], [25, 6], [12], [3]]
 
     def __init__(self):
         self.N_mpcsteps = 0
-        self.mpc_times = [ 0.0 for dim0 in range(10) ]
-        self.hkd_controls = [ [ 0.0 for dim1 in range(24) ] for dim0 in range(10) ]
-        self.des_body_state = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(10) ]
-        self.contacts = [ [ 0 for dim1 in range(4) ] for dim0 in range(10) ]
-        self.statusTimes = [ [ 0.0 for dim1 in range(4) ] for dim0 in range(10) ]
+        self.mpc_times = [ 0.0 for dim0 in range(25) ]
+        self.hkd_controls = [ [ 0.0 for dim1 in range(24) ] for dim0 in range(25) ]
+        self.des_body_state = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(25) ]
+        self.contacts = [ [ 0 for dim1 in range(4) ] for dim0 in range(25) ]
+        self.statusTimes = [ [ 0.0 for dim1 in range(4) ] for dim0 in range(25) ]
         self.foot_placement = [ 0.0 for dim0 in range(12) ]
-        self.feedback = [ [ [ 0.0 for dim2 in range(12) ] for dim1 in range(12) ] for dim0 in range(10) ]
+        self.feedback = [ [ [ 0.0 for dim2 in range(12) ] for dim1 in range(12) ] for dim0 in range(25) ]
         self.solve_time = 0.0
-        self.qJ_ref = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(10) ]
-        self.qJd_ref = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(10) ]
-        self.terrain_info = [ [ 0.0 for dim1 in range(6) ] for dim0 in range(10) ]
+        self.qJ_ref = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(25) ]
+        self.qJd_ref = [ [ 0.0 for dim1 in range(12) ] for dim0 in range(25) ]
+        self.terrain_info = [ [ 0.0 for dim1 in range(6) ] for dim0 in range(25) ]
         self.foot_placement_rel_com = [ 0.0 for dim0 in range(12) ]
         self.vcom_td = [ 0.0 for dim0 in range(3) ]
 
@@ -40,25 +40,25 @@ class hkd_command_lcmt(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack(">i", self.N_mpcsteps))
-        buf.write(struct.pack('>10d', *self.mpc_times[:10]))
-        for i0 in range(10):
+        buf.write(struct.pack('>25d', *self.mpc_times[:25]))
+        for i0 in range(25):
             buf.write(struct.pack('>24f', *self.hkd_controls[i0][:24]))
-        for i0 in range(10):
+        for i0 in range(25):
             buf.write(struct.pack('>12f', *self.des_body_state[i0][:12]))
-        for i0 in range(10):
+        for i0 in range(25):
             buf.write(struct.pack('>4i', *self.contacts[i0][:4]))
-        for i0 in range(10):
+        for i0 in range(25):
             buf.write(struct.pack('>4d', *self.statusTimes[i0][:4]))
         buf.write(struct.pack('>12f', *self.foot_placement[:12]))
-        for i0 in range(10):
+        for i0 in range(25):
             for i1 in range(12):
                 buf.write(struct.pack('>12f', *self.feedback[i0][i1][:12]))
         buf.write(struct.pack(">f", self.solve_time))
-        for i0 in range(10):
+        for i0 in range(25):
             buf.write(struct.pack('>12f', *self.qJ_ref[i0][:12]))
-        for i0 in range(10):
+        for i0 in range(25):
             buf.write(struct.pack('>12f', *self.qJd_ref[i0][:12]))
-        for i0 in range(10):
+        for i0 in range(25):
             buf.write(struct.pack('>6f', *self.terrain_info[i0][:6]))
         buf.write(struct.pack('>12f', *self.foot_placement_rel_com[:12]))
         buf.write(struct.pack('>3f', *self.vcom_td[:3]))
@@ -76,34 +76,34 @@ class hkd_command_lcmt(object):
     def _decode_one(buf):
         self = hkd_command_lcmt()
         self.N_mpcsteps = struct.unpack(">i", buf.read(4))[0]
-        self.mpc_times = struct.unpack('>10d', buf.read(80))
+        self.mpc_times = struct.unpack('>25d', buf.read(200))
         self.hkd_controls = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.hkd_controls.append(struct.unpack('>24f', buf.read(96)))
         self.des_body_state = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.des_body_state.append(struct.unpack('>12f', buf.read(48)))
         self.contacts = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.contacts.append(struct.unpack('>4i', buf.read(16)))
         self.statusTimes = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.statusTimes.append(struct.unpack('>4d', buf.read(32)))
         self.foot_placement = struct.unpack('>12f', buf.read(48))
         self.feedback = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.feedback.append([])
             for i1 in range(12):
                 self.feedback[i0].append(struct.unpack('>12f', buf.read(48)))
         self.solve_time = struct.unpack(">f", buf.read(4))[0]
         self.qJ_ref = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.qJ_ref.append(struct.unpack('>12f', buf.read(48)))
         self.qJd_ref = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.qJd_ref.append(struct.unpack('>12f', buf.read(48)))
         self.terrain_info = []
-        for i0 in range(10):
+        for i0 in range(25):
             self.terrain_info.append(struct.unpack('>6f', buf.read(24)))
         self.foot_placement_rel_com = struct.unpack('>12f', buf.read(48))
         self.vcom_td = struct.unpack('>3f', buf.read(12))
@@ -113,7 +113,7 @@ class hkd_command_lcmt(object):
     _hash = None
     def _get_hash_recursive(parents):
         if hkd_command_lcmt in parents: return 0
-        tmphash = (0x9669281c3ebd447f) & 0xffffffffffffffff
+        tmphash = (0x8943aaf62325041b) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

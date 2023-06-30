@@ -16,27 +16,27 @@ class hkd_command_lcmt
     public:
         int32_t    N_mpcsteps;
 
-        double     mpc_times[10];
+        double     mpc_times[25];
 
-        float      hkd_controls[10][24];
+        float      hkd_controls[25][24];
 
-        float      des_body_state[10][12];
+        float      des_body_state[25][12];
 
-        int32_t    contacts[10][4];
+        int32_t    contacts[25][4];
 
-        double     statusTimes[10][4];
+        double     statusTimes[25][4];
 
         float      foot_placement[12];
 
-        float      feedback[10][12][12];
+        float      feedback[25][12][12];
 
         float      solve_time;
 
-        float      qJ_ref[10][12];
+        float      qJ_ref[25][12];
 
-        float      qJd_ref[10][12];
+        float      qJd_ref[25][12];
 
-        float      terrain_info[10][6];
+        float      terrain_info[25][6];
 
         float      foot_placement_rel_com[12];
 
@@ -141,25 +141,25 @@ int hkd_command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->N_mpcsteps, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 10);
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 25);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->hkd_controls[a0][0], 24);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->des_body_state[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->contacts[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->statusTimes[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
@@ -167,7 +167,7 @@ int hkd_command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->foot_placement[0], 12);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         for (int a1 = 0; a1 < 12; a1++) {
             tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->feedback[a0][a1][0], 12);
             if(tlen < 0) return tlen; else pos += tlen;
@@ -177,17 +177,17 @@ int hkd_command_lcmt::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->solve_time, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->qJ_ref[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->qJd_ref[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->terrain_info[a0][0], 6);
         if(tlen < 0) return tlen; else pos += tlen;
     }
@@ -208,25 +208,25 @@ int hkd_command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->N_mpcsteps, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 10);
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->mpc_times[0], 25);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->hkd_controls[a0][0], 24);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->des_body_state[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->contacts[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->statusTimes[a0][0], 4);
         if(tlen < 0) return tlen; else pos += tlen;
     }
@@ -234,7 +234,7 @@ int hkd_command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->foot_placement[0], 12);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         for (int a1 = 0; a1 < 12; a1++) {
             tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->feedback[a0][a1][0], 12);
             if(tlen < 0) return tlen; else pos += tlen;
@@ -244,17 +244,17 @@ int hkd_command_lcmt::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->solve_time, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->qJ_ref[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->qJd_ref[a0][0], 12);
         if(tlen < 0) return tlen; else pos += tlen;
     }
 
-    for (int a0 = 0; a0 < 10; a0++) {
+    for (int a0 = 0; a0 < 25; a0++) {
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->terrain_info[a0][0], 6);
         if(tlen < 0) return tlen; else pos += tlen;
     }
@@ -272,17 +272,17 @@ int hkd_command_lcmt::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += __int32_t_encoded_array_size(NULL, 1);
-    enc_size += __double_encoded_array_size(NULL, 10);
-    enc_size += 10 * __float_encoded_array_size(NULL, 24);
-    enc_size += 10 * __float_encoded_array_size(NULL, 12);
-    enc_size += 10 * __int32_t_encoded_array_size(NULL, 4);
-    enc_size += 10 * __double_encoded_array_size(NULL, 4);
+    enc_size += __double_encoded_array_size(NULL, 25);
+    enc_size += 25 * __float_encoded_array_size(NULL, 24);
+    enc_size += 25 * __float_encoded_array_size(NULL, 12);
+    enc_size += 25 * __int32_t_encoded_array_size(NULL, 4);
+    enc_size += 25 * __double_encoded_array_size(NULL, 4);
     enc_size += __float_encoded_array_size(NULL, 12);
-    enc_size += 10 * 12 * __float_encoded_array_size(NULL, 12);
+    enc_size += 25 * 12 * __float_encoded_array_size(NULL, 12);
     enc_size += __float_encoded_array_size(NULL, 1);
-    enc_size += 10 * __float_encoded_array_size(NULL, 12);
-    enc_size += 10 * __float_encoded_array_size(NULL, 12);
-    enc_size += 10 * __float_encoded_array_size(NULL, 6);
+    enc_size += 25 * __float_encoded_array_size(NULL, 12);
+    enc_size += 25 * __float_encoded_array_size(NULL, 12);
+    enc_size += 25 * __float_encoded_array_size(NULL, 6);
     enc_size += __float_encoded_array_size(NULL, 12);
     enc_size += __float_encoded_array_size(NULL, 3);
     return enc_size;
@@ -290,7 +290,7 @@ int hkd_command_lcmt::_getEncodedSizeNoHash() const
 
 uint64_t hkd_command_lcmt::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x9669281c3ebd447fLL;
+    uint64_t hash = 0x8943aaf62325041bLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

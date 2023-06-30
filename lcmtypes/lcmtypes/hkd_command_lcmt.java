@@ -28,22 +28,22 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
     public hkd_command_lcmt()
     {
-        mpc_times = new double[10];
-        hkd_controls = new float[10][24];
-        des_body_state = new float[10][12];
-        contacts = new int[10][4];
-        statusTimes = new double[10][4];
+        mpc_times = new double[25];
+        hkd_controls = new float[25][24];
+        des_body_state = new float[25][12];
+        contacts = new int[25][4];
+        statusTimes = new double[25][4];
         foot_placement = new float[12];
-        feedback = new float[10][12][12];
-        qJ_ref = new float[10][12];
-        qJd_ref = new float[10][12];
-        terrain_info = new float[10][6];
+        feedback = new float[25][12][12];
+        qJ_ref = new float[25][12];
+        qJd_ref = new float[25][12];
+        terrain_info = new float[25][6];
         foot_placement_rel_com = new float[12];
         vcom_td = new float[3];
     }
  
     public static final long LCM_FINGERPRINT;
-    public static final long LCM_FINGERPRINT_BASE = 0x9669281c3ebd447fL;
+    public static final long LCM_FINGERPRINT_BASE = 0x8943aaf62325041bL;
  
     static {
         LCM_FINGERPRINT = _hashRecursive(new ArrayList<Class<?>>());
@@ -71,29 +71,29 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
     {
         outs.writeInt(this.N_mpcsteps); 
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             outs.writeDouble(this.mpc_times[a]); 
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 24; b++) {
                 outs.writeFloat(this.hkd_controls[a][b]); 
             }
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 outs.writeFloat(this.des_body_state[a][b]); 
             }
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 4; b++) {
                 outs.writeInt(this.contacts[a][b]); 
             }
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 4; b++) {
                 outs.writeDouble(this.statusTimes[a][b]); 
             }
@@ -103,7 +103,7 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
             outs.writeFloat(this.foot_placement[a]); 
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 for (int c = 0; c < 12; c++) {
                     outs.writeFloat(this.feedback[a][b][c]); 
@@ -113,19 +113,19 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         outs.writeFloat(this.solve_time); 
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 outs.writeFloat(this.qJ_ref[a][b]); 
             }
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 outs.writeFloat(this.qJd_ref[a][b]); 
             }
         }
  
-        for (int a = 0; a < 10; a++) {
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 6; b++) {
                 outs.writeFloat(this.terrain_info[a][b]); 
             }
@@ -165,34 +165,34 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
     {
         this.N_mpcsteps = ins.readInt();
  
-        this.mpc_times = new double[(int) 10];
-        for (int a = 0; a < 10; a++) {
+        this.mpc_times = new double[(int) 25];
+        for (int a = 0; a < 25; a++) {
             this.mpc_times[a] = ins.readDouble();
         }
  
-        this.hkd_controls = new float[(int) 10][(int) 24];
-        for (int a = 0; a < 10; a++) {
+        this.hkd_controls = new float[(int) 25][(int) 24];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 24; b++) {
                 this.hkd_controls[a][b] = ins.readFloat();
             }
         }
  
-        this.des_body_state = new float[(int) 10][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        this.des_body_state = new float[(int) 25][(int) 12];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 this.des_body_state[a][b] = ins.readFloat();
             }
         }
  
-        this.contacts = new int[(int) 10][(int) 4];
-        for (int a = 0; a < 10; a++) {
+        this.contacts = new int[(int) 25][(int) 4];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 4; b++) {
                 this.contacts[a][b] = ins.readInt();
             }
         }
  
-        this.statusTimes = new double[(int) 10][(int) 4];
-        for (int a = 0; a < 10; a++) {
+        this.statusTimes = new double[(int) 25][(int) 4];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 4; b++) {
                 this.statusTimes[a][b] = ins.readDouble();
             }
@@ -203,8 +203,8 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
             this.foot_placement[a] = ins.readFloat();
         }
  
-        this.feedback = new float[(int) 10][(int) 12][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        this.feedback = new float[(int) 25][(int) 12][(int) 12];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 for (int c = 0; c < 12; c++) {
                     this.feedback[a][b][c] = ins.readFloat();
@@ -214,22 +214,22 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
  
         this.solve_time = ins.readFloat();
  
-        this.qJ_ref = new float[(int) 10][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        this.qJ_ref = new float[(int) 25][(int) 12];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 this.qJ_ref[a][b] = ins.readFloat();
             }
         }
  
-        this.qJd_ref = new float[(int) 10][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        this.qJd_ref = new float[(int) 25][(int) 12];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 this.qJd_ref[a][b] = ins.readFloat();
             }
         }
  
-        this.terrain_info = new float[(int) 10][(int) 6];
-        for (int a = 0; a < 10; a++) {
+        this.terrain_info = new float[(int) 25][(int) 6];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 6; b++) {
                 this.terrain_info[a][b] = ins.readFloat();
             }
@@ -252,44 +252,44 @@ public final class hkd_command_lcmt implements lcm.lcm.LCMEncodable
         lcmtypes.hkd_command_lcmt outobj = new lcmtypes.hkd_command_lcmt();
         outobj.N_mpcsteps = this.N_mpcsteps;
  
-        outobj.mpc_times = new double[(int) 10];
-        System.arraycopy(this.mpc_times, 0, outobj.mpc_times, 0, 10); 
-        outobj.hkd_controls = new float[(int) 10][(int) 24];
-        for (int a = 0; a < 10; a++) {
+        outobj.mpc_times = new double[(int) 25];
+        System.arraycopy(this.mpc_times, 0, outobj.mpc_times, 0, 25); 
+        outobj.hkd_controls = new float[(int) 25][(int) 24];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.hkd_controls[a], 0, outobj.hkd_controls[a], 0, 24);        }
  
-        outobj.des_body_state = new float[(int) 10][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        outobj.des_body_state = new float[(int) 25][(int) 12];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.des_body_state[a], 0, outobj.des_body_state[a], 0, 12);        }
  
-        outobj.contacts = new int[(int) 10][(int) 4];
-        for (int a = 0; a < 10; a++) {
+        outobj.contacts = new int[(int) 25][(int) 4];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.contacts[a], 0, outobj.contacts[a], 0, 4);        }
  
-        outobj.statusTimes = new double[(int) 10][(int) 4];
-        for (int a = 0; a < 10; a++) {
+        outobj.statusTimes = new double[(int) 25][(int) 4];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.statusTimes[a], 0, outobj.statusTimes[a], 0, 4);        }
  
         outobj.foot_placement = new float[(int) 12];
         System.arraycopy(this.foot_placement, 0, outobj.foot_placement, 0, 12); 
-        outobj.feedback = new float[(int) 10][(int) 12][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        outobj.feedback = new float[(int) 25][(int) 12][(int) 12];
+        for (int a = 0; a < 25; a++) {
             for (int b = 0; b < 12; b++) {
                 System.arraycopy(this.feedback[a][b], 0, outobj.feedback[a][b], 0, 12);            }
         }
  
         outobj.solve_time = this.solve_time;
  
-        outobj.qJ_ref = new float[(int) 10][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        outobj.qJ_ref = new float[(int) 25][(int) 12];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.qJ_ref[a], 0, outobj.qJ_ref[a], 0, 12);        }
  
-        outobj.qJd_ref = new float[(int) 10][(int) 12];
-        for (int a = 0; a < 10; a++) {
+        outobj.qJd_ref = new float[(int) 25][(int) 12];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.qJd_ref[a], 0, outobj.qJd_ref[a], 0, 12);        }
  
-        outobj.terrain_info = new float[(int) 10][(int) 6];
-        for (int a = 0; a < 10; a++) {
+        outobj.terrain_info = new float[(int) 25][(int) 6];
+        for (int a = 0; a < 25; a++) {
             System.arraycopy(this.terrain_info[a], 0, outobj.terrain_info[a], 0, 6);        }
  
         outobj.foot_placement_rel_com = new float[(int) 12];

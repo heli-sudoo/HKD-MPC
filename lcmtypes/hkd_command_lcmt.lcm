@@ -1,19 +1,19 @@
 struct hkd_command_lcmt {
     int32_t N_mpcsteps;
-    double mpc_times[10];
-    float hkd_controls[10][24];
-    float des_body_state[10][12];
-    int32_t contacts[10][4];
-    double statusTimes[10][4];
+    double mpc_times[25];
+    float hkd_controls[25][24];
+    float des_body_state[25][12];
+    int32_t contacts[25][4];
+    double statusTimes[25][4];
     float foot_placement[12];       
-    float feedback[10][12][12];
+    float feedback[25][12][12];
     float solve_time;
 
-    float qJ_ref[10][12];
+    float qJ_ref[25][12];
 
-    float qJd_ref[10][12];
+    float qJd_ref[25][12];
 
-    float terrain_info[10][6]; 
+    float terrain_info[25][6]; 
 
     float foot_placement_rel_com[12]; 
 

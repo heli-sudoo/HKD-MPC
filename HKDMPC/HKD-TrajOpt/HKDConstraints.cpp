@@ -32,6 +32,11 @@ GRFConstraint<T>::GRFConstraint(const VecM<int, 4> &ctact)
             ++i;
         }               
     }
+
+    #ifdef MIP_HOPPING
+    center_point = VecM<T, 3>(0, 0, 0);
+    eul_terrain = VecM<T, 3>(0, 0, 0);
+    #endif
 }
 
 template <typename T>
@@ -47,9 +52,33 @@ void GRFConstraint<T>::compute_violation(const State &x, const Contrl &u, const 
     (void)(x);
     (void)(y);
 
+    #ifdef MIP_HOPPING
+    Mat3<T> R;
+    EulerZYX_2_SO3(eul_terrain, R);
+    DMat<T> R_block = DMat<T>::Zero(24,24);
+    for (int l = 0; l < 4; l++){
+        R_block.block(3*l,3*l,3,3) = R;
+    }
+    #endif
+
     for (size_t i = 0; i < this->data[k].size(); i++)
     {
-        this->data[k][i].g = A.row(i) * u;        
+        #ifdef MIP_HOPPING
+        if (i != 0){
+            this->data[k][i].g = A.row(i) * (R_block.transpose() * u);
+        }
+        else{
+            this->data[k][i].g = A.row(i) * (R_block.transpose() * u) - 10;
+        }
+        #else
+        if (i != 0){
+            this->data[k][i].g = A.row(i) * u; 
+            
+        }
+        else{
+            this->data[k][i].g = A.row(i) * u - 10;
+        }
+        #endif
     }
     this->update_max_violation(k);
 }

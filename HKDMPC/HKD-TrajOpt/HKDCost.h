@@ -15,10 +15,10 @@ public:
         VecM<T, 3> q_pos(1, 1, 30);
         VecM<T, 3> q_omega(.2, .2, .2);
         VecM<T, 3> q_v(4, 1, .5);
-        // VecM<T, 3> q_eul(1, 4, 5);
-        // VecM<T, 3> q_pos(20, 1, 30);
-        // VecM<T, 3> q_omega(.2, .2, .2);
-        // VecM<T, 3> q_v(10, 1, 20);
+        // q_eul *= 100;
+        // q_pos << 20, 1, 30;
+        // q_omega *= 10;
+        q_v << 4, 1, 20;
         VecM<T, 12> q_qJ;                        
         q_qJ << VecM<T, 3>::Constant(.2 * (1 - contact[0])),
                 VecM<T, 3>::Constant(.2 * (1 - contact[1])),

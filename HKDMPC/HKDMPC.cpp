@@ -26,7 +26,7 @@ void HKDMPCSolver<T>::initialize()
     loadHSDDPSetting(fname_ddp_setting, ddp_options);
 
     mpc_config.plan_duration = 0.6;
-    mpc_config.nsteps_between_mpc = 1;//2;
+    mpc_config.nsteps_between_mpc = 2;
     mpc_config.timeStep = 0.01;
     dt_mpc = mpc_config.timeStep;
 
@@ -45,7 +45,7 @@ void HKDMPCSolver<T>::initialize()
     // set the initial condition
     xinit.setZero(24);
     // QuadAugmentedState<T> init_state = quad_ref_ptr->get_a_reference_ptr_at_t
-    body << -0.0225986, -0.000379039, 0.00616269, 0.0244286, 0.00458743, 0.163823, 0, 0, 0, 0, 0, 0;
+    body << 0.0, 0.0, 0.0, 0.0, 0.0, 0.18, 0, 0, 0, 0, 0, 0;
     qJ << 0,-1.040, 2.220, 0,-1.040, 2.220, 0,-1.040, 2.220, 0,-1.040, 2.220;
     pos = body.segment(3, 3);
     eul = body.head(3);
@@ -175,7 +175,8 @@ void HKDMPCSolver<T>::update()
     // if (mpc_time > 0.199){
     //     std::string folder_name = "../HKDMPC/log/";
     //     log_trajectory_sequence(folder_name, opt_problem_data.trajectory_ptrs);
-    //     assert(1==0);
+    //     std::cout << "mpc_time: " << mpc_time << std::endl;
+    //     exit(1);
     // }
 
     // end = clock();
@@ -335,7 +336,7 @@ void HKDMPCSolver<T>::publish_mpc_cmd()
         }
         for (int i = 0; i < 3; i ++){
             hkd_cmds.terrain_info[k][i] = quad_ref_aug_state->center_point[i];
-            hkd_cmds.terrain_info[k][i + 3] = quad_ref_aug_state->plane_coefficients[i];
+            hkd_cmds.terrain_info[k][i + 3] = quad_ref_aug_state->eul_terrain[i];
         }
     }
     

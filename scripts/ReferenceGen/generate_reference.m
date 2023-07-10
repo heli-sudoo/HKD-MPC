@@ -61,8 +61,10 @@ for i = 1:tau_sz
     fprintf(fid, 'center_point\n');
     fprintf_array(fid, center_point(i,:), '%6.3f ');
 
-    fprintf(fid, 'plane_coefficients\n');
-    fprintf_array(fid, plane_coefficients(i,:), '%6.3f ');
+%     fprintf(fid, 'plane_coefficients\n');
+%     fprintf_array(fid, plane_coefficients(i,:), '%6.3f ');
+    fprintf(fid, 'eul_terrain\n');
+    fprintf_array(fid, eul_terrain(i,:), '%6.3f ');
 
 end
 fclose(fid);

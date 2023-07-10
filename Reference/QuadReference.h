@@ -27,7 +27,7 @@ struct QuadAugmentedState
     VecM<double, 4> status_dur;       // contact status duration
     #ifdef MIP_HOPPING
     VecM<double, 3> center_point; // point on the plane of current terain
-    VecM<double, 3> plane_coefficients; // coefficients of the plane of current terrain
+    VecM<double, 3> eul_terrain; // coefficients of the plane of current terrain
     #endif
 
     void SetZero()
@@ -42,7 +42,7 @@ struct QuadAugmentedState
         status_dur.setZero();
         #ifdef MIP_HOPPING
         center_point.setZero();
-        plane_coefficients.setZero();
+        eul_terrain.setZero();
         #endif
     }
 
@@ -76,8 +76,8 @@ struct QuadAugmentedState
         std::cout << "center_point = \n";
         std::cout << center_point.transpose() << "\n";
 
-        std::cout << "plane_coefficients = \n";
-        std::cout << plane_coefficients.transpose() << "\n";
+        std::cout << "eul_terrain = \n";
+        std::cout << eul_terrain.transpose() << "\n";
         #endif
     }
 };

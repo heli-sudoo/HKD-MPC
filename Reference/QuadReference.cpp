@@ -305,7 +305,7 @@ void QuadReference::load_top_level_data(const std::string& fname, bool reorder)
             continue;
         }
 
-        if (line.find("plane_coefficients") != std::string::npos)
+        if (line.find("eul_terrain") != std::string::npos)
         {
             getline(fstrm, line);
             std::stringstream lstrm(line);
@@ -313,7 +313,7 @@ void QuadReference::load_top_level_data(const std::string& fname, bool reorder)
             int i = 0;
             while (lstrm >> word)
             {
-                quad_state.plane_coefficients[i] = std::stof(word);
+                quad_state.eul_terrain[i] = std::stof(word);
                 i++;
                 if (i >= 3) break;
             }
@@ -348,7 +348,7 @@ void QuadReference::reorder_states()
         /* reorder body state. original: [eul, pos, omega, vWorld]. reordered: [pos, eul, vWorld, eul_rate] */
         state_reordered.body_state << state_org.body_state.segment<3>(3), state_org.body_state.head<3>(),
                                       state_org.body_state.tail<3>(), state_org.body_state.segment<3>(6);
-        state_reordered.body_state[2] = 0.25;       
+        // state_reordered.body_state[2] = 0.25;       
         // state_reordered.body_state[6] = 1.0;                                      
         /* flip the right and left legs */
         state_reordered.qJ << state_org.qJ.segment<3>(3), state_org.qJ.head<3>(), state_org.qJ.tail<3>(), state_org.qJ.segment<3>(6);       

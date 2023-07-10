@@ -1,62 +1,69 @@
 clear all;
 
-% Gait ="RunJump/";
-% Gait = "MixedHopping/";
-% Gait = "RunJump_ICRA23/";
-% Gait = "Trot/";
-name = 'AngledBox';
+name = 'DiamondRight';
 Gait = "MIP_Hopping/"+name+"/";
 
 body_states = readmatrix(Gait + "body_state.csv");
 body_states(:,1:3) = flip(body_states(:,1:3),2);
-body_states(:,7:9) = flip(body_states(:,7:9),2);
+
+% omega to body frame
+% for i = 1:size(body_states,1)
+%     R = eul2rotm(body_states(i,1:3));
+%     body_states(:,7:9) = (R' * body_states(:,7:9)')';
+% end
+% body_states(:,7:9) = flip(body_states(:,7:9),2);
+
 contacts = readmatrix(Gait + "contact.csv");
 foot_placements = readmatrix(Gait + "ee_pos.csv");
 qJs = readmatrix(Gait + "jnt.csv");
 t = readmatrix(Gait + "time.csv", "Delimiter",",");
 
 center_point = readmatrix(Gait+"center_point.csv");
-plane_coefficients = readmatrix(Gait+"plane_coefficients.csv");
+% plane_coefficients = readmatrix(Gait+"plane_coefficients.csv");
+eul_terrain = readmatrix(Gait+"eul_terrain.csv");
 
 grfs = readmatrix(Gait+'grfs.csv');
 
 qJds = readmatrix(Gait+'djnt.csv');
 
-% name = 'TestOrientation';
-% Gait = "MIP_Hopping/"+name+"/";
-% length_traj = size(body_states,1);
-% for i = 1:length_traj
-%     body_states(i,4:6) = body_states(1,4:6);
-%     foot_placements(i,:) = foot_placements(1,:);
-%     qJs(i,:) = qJs(1,:);
-%     center_point(i,:) = center_point(1,:);
-%     plane_coefficients(i,:) = plane_coefficients(1,:);
-%     grfs(i,:) = [0,0,22.05,0,0,22.05,0,0,22.05,0,0,22.05];
-% end
+for i = 1:size(grfs,1)
+    if ~(grfs(i,3) > 0)
+        contacts(i,:) = zeros(1,4);
+    end
+end
+
+
+% test orientation tracking with velocity too
+% body_states(:,1:5) = 0 * body_states(:,1:5);
+% body_states(:,4:5) = 0 * body_states(:,4:5);
+% body_states(:,6) = 0.18;
+% body_states(:,7:12) = 0 * body_states(:,7:12);
+% body_states(:,10:12) = 0 * body_states(:,10:12);
+
 % contacts = ones(size(contacts));
-% body_states(:,1:3) = 0*body_states(:,1:3);
-% body_states(:,7:12) = 0*body_states(:,7:12);
+% foot_placements = repmat(foot_placements(1,:),[size(foot_placements,1),1]);
+% qJs = repmat(qJs(1,:),[size(qJs,1),1]);
+% qJds = repmat(qJds(1,:),[size(qJds,1),1]);
+% center_point = 0 * center_point;
+% plane_coefficients = repmat(plane_coefficients(1,:),[size(plane_coefficients,1),1]);
+grfs = repmat([0,0,9 * 9.8 / 4],[size(grfs,1),4]);
+
+% for i = 2:100
+%     body_states(i,9) = 0.4;
+%     body_states(i,1) = body_states(i-1,1) + 0.01 * body_states(i,9);
+% end
 % 
-% turn = pi/8;
-% for i = 1:length_traj
-%     for j = 1:7
-%         if (i < j/7 * length_traj)
-%             if j == 2
-%                 body_states(i,1) = turn;
-%             elseif j == 3
-%                 body_states(i,1) = -turn;
-%             elseif j == 4
-%                 body_states(i,2) = turn;
-%             elseif j == 5
-%                 body_states(i,2) = -turn;
-%             elseif j == 6
-%                 body_states(i,3) = turn;
-%             elseif j == 7
-%                 body_states(i,3) = -turn;
-%             end
-%             break
-%         end
-%     end
+% for i = 101:200
+%     body_states(i,8) = -0.4;
+%     body_states(i,1) = body_states(i-1,1);
+%     body_states(i,2) = body_states(i-1,2) + 0.01 * body_states(i,8);
+% end
+% 
+% for i = 201:300
+%     body_states(i,7) = 0.4;
+%     body_states(i,1) = body_states(i-1,1);
+%     body_states(i,2) = body_states(i-1,2);
+%     body_states(i,3) = body_states(i-1,3) + 0.01 * body_states(i,7);
 % end
 
-save(Gait+"Data.mat",'body_states','contacts','foot_placements','qJs','t','center_point','plane_coefficients','grfs','qJds');
+save(Gait+"Data.mat",'body_states','contacts','foot_placements','qJs','t','center_point','eul_terrain','grfs','qJds');

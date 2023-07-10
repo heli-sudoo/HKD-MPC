@@ -1,0 +1,50 @@
+clear all;
+
+name = 'AngledBoxRight';
+Gait = "MIP_Hopping/"+name+"/";
+
+body_states = readmatrix(Gait + "body_state.csv");
+body_states(:,1:3) = flip(body_states(:,1:3),2);
+
+% omega to body frame
+for i = 1:size(body_states,1)
+    R = eul2rotm(body_states(i,1:3));
+    body_states(:,7:9) = (R' * body_states(:,7:9)')';
+end
+
+% body_states(:,7:9) = flip(body_states(:,7:9),2);
+contacts = readmatrix(Gait + "contact.csv");
+foot_placements = readmatrix(Gait + "ee_pos.csv");
+qJs = readmatrix(Gait + "jnt.csv");
+t = readmatrix(Gait + "time.csv", "Delimiter",",");
+
+center_point = readmatrix(Gait+"center_point.csv");
+plane_coefficients = readmatrix(Gait+"plane_coefficients.csv");
+
+grfs = readmatrix(Gait+'grfs.csv');
+
+qJds = readmatrix(Gait+'djnt.csv');
+
+for i = 1:size(grfs,1)
+    if ~(grfs(i,3) > 0)
+        contacts(i,:) = zeros(1,4);
+    end
+end
+
+
+% test orientation tracking with velocity too
+body_states(:,1:5) = 0 * body_states(:,1:5);
+body_states(:,6) = 0.18;
+body_states(:,7:12) = 0 * body_states(:,7:12);
+
+contacts = ones(size(contacts));
+foot_placements = repmat(foot_placements(1,:),[size(foot_placements,1),1]);
+qJs = repmat(qJs(1,:),[size(qJs,1),1]);
+qJds = repmat(qJs(1,:),[size(qJds,1),1]);
+center_point = 0 * center_point;
+plane_coefficients = repmat(plane_coefficients(1,:),[size(plane_coefficients,1),1]);
+grfs = repmat([0,0,9 * 9.8 / 4],[size(grfs,1),4]);
+
+
+
+save(Gait+"Data.mat",'body_states','contacts','foot_placements','qJs','t','center_point','plane_coefficients','grfs','qJds');

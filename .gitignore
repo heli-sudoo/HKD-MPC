@@ -1,5 +1,4 @@
 *build
 .vscode
-MPC_Controller/log/**
-MPC_Controller/PolicyRollout/*.csv
+HKDMPC/log/**
 

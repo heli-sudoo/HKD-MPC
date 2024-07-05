@@ -1,9 +1,10 @@
-clear all;
+% clear all;
 
 % Gait ="RunJump/";
 % Gait = "MixedHopping/";
-% Gait = "RunJump_ICRA23/";
-Gait = "Trot/";
+Gait = "RunJump_ICRA23/";
+% Gait = "Trot/";
+% Gait = "SingleHop/";
 
 body_states = readmatrix(Gait + "body_state.csv");
 contacts = readmatrix(Gait + "contact.csv");

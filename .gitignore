@@ -1,4 +1,9 @@
 *build
 .vscode
 HKDMPC/log/**
+lcmtypes/cpp/
+lcmtypes/java/
+lcmtypes/python/
+lcmtypes/lcmtypes/
+Reference/Data/quad_reference.csv
 
